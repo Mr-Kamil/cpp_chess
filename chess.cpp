@@ -31,7 +31,7 @@ Bitboard white_board = 0ULL;
 Bitboard black_board = 0ULL;
 
 Bitboard enemy_board = 0ULL;
-Bitboard allies_board = 0ULL;
+Bitboard allies_board = 0x000000000000FF00ULL;
 
 
 void print_bitboard_as_bytes(Bitboard board) {
@@ -97,20 +97,20 @@ Bitboard generate_all_rooks_moves(Bitboard rook_board) {
 }
 
 
-Bitboard slide_bishop(Bitboard rook_position, int shift, Bitboard boundary_mask) {
-    Bitboard rooks_moves = 0ULL;
-    Bitboard move = rook_position;
+Bitboard slide_bishop(Bitboard bishop_position, int shift, Bitboard boundary_mask) {
+    Bitboard bishops_moves = 0ULL;
+    Bitboard move = bishop_position;
 
     while (!(move & boundary_mask)) {
         move = (shift > 0) ? (move << shift) : (move >> -shift);
 
         int move_occupation = check_move_occupied(move);
         if (move_occupation == 1) break; 
-        rooks_moves |= move;                   
+        bishops_moves |= move;                   
         if (move_occupation == 2) break; 
     }
 
-    return rooks_moves;
+    return bishops_moves;
 }
 
 
@@ -141,10 +141,34 @@ Bitboard generate_all_pawns_moves(Bitboard pawns_board)
 }
 
 
-Bitboard generate_all_kings_moves(Bitboard kings_board)
-{
+Bitboard slide_king(Bitboard king_position, int shift, Bitboard boundary_mask) {
     Bitboard kings_moves = 0ULL;
+    Bitboard move = king_position;
+
+    if (!(move & boundary_mask)) {
+        move = (shift > 0) ? (move << shift) : (move >> -shift);
+
+        int move_occupation = check_move_occupied(move);
+        if (move_occupation == 1); 
+        kings_moves |= move;                   
+        if (move_occupation == 2); 
+    }
+
     return kings_moves;
+}
+
+
+
+Bitboard generate_all_kings_moves(Bitboard king_board)
+{
+    Bitboard king_moves = 0ULL;
+
+    king_moves |= slide_king(king_board, -1, FILE_A);
+    king_moves |= slide_king(king_board, 1, FILE_H);
+    king_moves |= slide_king(king_board, -8, RANK_1);
+    king_moves |= slide_king(king_board, 8, RANK_8);
+
+    return king_moves;
 }
 
 
@@ -177,6 +201,7 @@ int main()
     print_bitboard(generate_all_bishops_moves(test_board_1));
 
     std::cout << "KING: " << std::endl;
+    print_bitboard(generate_all_kings_moves(test_board_1));
 
     std::cout << "QUEEN: " << std::endl;
     print_bitboard(generate_all_queens_moves(test_board_1));
