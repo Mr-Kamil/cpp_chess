@@ -1,6 +1,5 @@
 #include <iostream>
 #include <iomanip>
-// #include <cstdint>
 
 typedef uint64_t Bitboard;
 
@@ -20,18 +19,18 @@ bits:    1  0  0  0  0  0  0  0  0  1     bytes: 0
 
 
 
-const Bitboard FILE_A = 0x0101010101010101ULL;
-const Bitboard FILE_H = 0x8080808080808080ULL;
-const Bitboard RANK_1 = 0x00000000000000FFULL;
-const Bitboard RANK_8 = 0xFF00000000000000ULL;
-const Bitboard BOUNDARIES = FILE_A | FILE_H | RANK_1 | RANK_8; // 0xFF818181818181FFULL;
+const Bitboard FILE_A = 0x01'01'01'01'01'01'01'01ULL;
+const Bitboard FILE_H = 0x80'80'80'80'80'80'80'80ULL;
+const Bitboard RANK_1 = 0x00'00'00'00'00'00'00'FFULL;
+const Bitboard RANK_8 = 0xFF'00'00'00'00'00'00'00ULL;
+const Bitboard BOUNDARIES = FILE_A | FILE_H | RANK_1 | RANK_8; // 0xFF'81'81'81'81'81'81'FFULL;
 
 
 Bitboard white_board = 0ULL;
 Bitboard black_board = 0ULL;
 
 Bitboard enemy_board = 0ULL;
-Bitboard allies_board = 0x000000000000FF00ULL;
+Bitboard allies_board = 0ULL;
 
 
 void print_bitboard_as_bytes(Bitboard board) {
@@ -41,7 +40,7 @@ void print_bitboard_as_bytes(Bitboard board) {
 }
 
 
-void print_bitboard(Bitboard board)
+void print_graphic_bitboard(Bitboard board)
 {
     for (int rank = 7; rank >= 0; --rank) {
         for (int file = 0; file < 8; ++file) {
@@ -158,7 +157,6 @@ Bitboard slide_king(Bitboard king_position, int shift, Bitboard boundary_mask) {
 }
 
 
-
 Bitboard generate_all_kings_moves(Bitboard king_board)
 {
     Bitboard king_moves = 0ULL;
@@ -179,8 +177,6 @@ Bitboard generate_all_queens_moves(Bitboard queen_board)
 }
 
 
-
-
 int main() 
 {
     std::cout << bitboard_representation << std::endl;
@@ -188,23 +184,23 @@ int main()
     Bitboard demonstrative_board = 0x8000000001000002ULL;
     std::cout << "DEMONTRATIVE BOARD: " << std::endl;
     print_bitboard_as_bytes(demonstrative_board);
-    print_bitboard(demonstrative_board);
+    print_graphic_bitboard(demonstrative_board);
 
     Bitboard test_board_1 = 0x0000040000000000ULL;
     std::cout << "TEST BOARD: " << std::endl;
-    print_bitboard(test_board_1);
+    print_graphic_bitboard(test_board_1);
 
     std::cout << "ROOK: " << std::endl;
-    print_bitboard(generate_all_rooks_moves(test_board_1));
+    print_graphic_bitboard(generate_all_rooks_moves(test_board_1));
 
     std::cout << "BISHOP: " << std::endl;
-    print_bitboard(generate_all_bishops_moves(test_board_1));
+    print_graphic_bitboard(generate_all_bishops_moves(test_board_1));
 
     std::cout << "KING: " << std::endl;
-    print_bitboard(generate_all_kings_moves(test_board_1));
+    print_graphic_bitboard(generate_all_kings_moves(test_board_1));
 
     std::cout << "QUEEN: " << std::endl;
-    print_bitboard(generate_all_queens_moves(test_board_1));
+    print_graphic_bitboard(generate_all_queens_moves(test_board_1));
 
     std::cout << "KNIGHT: " << std::endl;
     
