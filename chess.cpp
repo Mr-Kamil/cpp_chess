@@ -127,31 +127,31 @@ Bitboard generate_all_bishops_moves(Bitboard bishop_board)
 }
 
 
-Bitboard generate_all_knights_moves(Bitboard rook_board)
+Bitboard generate_all_knights_moves(Bitboard knights_board)
 {
-    Bitboard rooks_moves = 0ULL;
-    return rooks_moves;
+    Bitboard knights_moves = 0ULL;
+    return knights_moves;
 }
 
 
-Bitboard generate_all_pawns_moves(Bitboard rook_board)
+Bitboard generate_all_pawns_moves(Bitboard pawns_board)
 {
-    Bitboard rooks_moves = 0ULL;
-    return rooks_moves;
+    Bitboard pawns_moves = 0ULL;
+    return pawns_moves;
 }
 
 
-Bitboard generate_all_kings_moves(Bitboard rook_board)
+Bitboard generate_all_kings_moves(Bitboard kings_board)
 {
-    Bitboard rooks_moves = 0ULL;
-    return rooks_moves;
+    Bitboard kings_moves = 0ULL;
+    return kings_moves;
 }
 
 
-Bitboard generate_all_queens_moves(Bitboard rook_board)
+Bitboard generate_all_queens_moves(Bitboard queen_board)
 {
-    Bitboard rooks_moves = 0ULL;
-    return rooks_moves;
+    Bitboard queens_moves = generate_all_bishops_moves(queen_board) | generate_all_rooks_moves(queen_board);
+    return queens_moves;
 }
 
 
@@ -160,20 +160,29 @@ Bitboard generate_all_queens_moves(Bitboard rook_board)
 int main() 
 {
     std::cout << bitboard_representation << std::endl;
+
     Bitboard demonstrative_board = 0x8000000001000002ULL;
     std::cout << "DEMONTRATIVE BOARD: " << std::endl;
     print_bitboard_as_bytes(demonstrative_board);
     print_bitboard(demonstrative_board);
+
     Bitboard test_board_1 = 0x0000040000000000ULL;
     std::cout << "TEST BOARD: " << std::endl;
     print_bitboard(test_board_1);
+
     std::cout << "ROOK: " << std::endl;
     print_bitboard(generate_all_rooks_moves(test_board_1));
+
     std::cout << "BISHOP: " << std::endl;
     print_bitboard(generate_all_bishops_moves(test_board_1));
+
     std::cout << "KING: " << std::endl;
+
     std::cout << "QUEEN: " << std::endl;
+    print_bitboard(generate_all_queens_moves(test_board_1));
+
     std::cout << "KNIGHT: " << std::endl;
+    
     std::cout << "PAWN: " << std::endl;
 
     return 0;
