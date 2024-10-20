@@ -22,6 +22,7 @@ const Bitboard FILE_A = 0x0101010101010101ULL;
 const Bitboard FILE_H = 0x8080808080808080ULL;
 const Bitboard RANK_1 = 0x00000000000000FFULL;
 const Bitboard RANK_8 = 0xFF00000000000000ULL;
+const Bitboard BOUNDARIES = FILE_A | FILE_H | RANK_1 | RANK_8; // 0xFF818181818181FFULL;
 
 
 
@@ -61,67 +62,30 @@ int check_move_occupied(Bitboard move)
 }
 
 
-Bitboard generate_all_rooks_moves(Bitboard rook_board)
-{
+Bitboard slide_rook(Bitboard rook_position, int shift, Bitboard boundary_mask) {
     Bitboard rooks_moves = 0ULL;
-    Bitboard move;
-    int move_occupation;
+    Bitboard move = rook_position;
 
-    move = rook_board;
-    while (!(move & FILE_A)) {
-        move >>= 1;
-        move_occupation = check_move_occupied(move);
+    while (!(move & boundary_mask)) {
+        move = (shift > 0) ? (move << shift) : (move >> -shift);
 
-        if (move_occupation == 1) {
-            break;
-        }
-        rooks_moves |= move;
-        if (move_occupation == 2) {
-            break;
-        }
+        int move_occupation = check_move_occupied(move);
+        if (move_occupation == 1) break; 
+        rooks_moves |= move;                   
+        if (move_occupation == 2) break; 
     }
 
-    move = rook_board;
-    while (!(move & FILE_H)) {
-        move <<= 1;
-        move_occupation = check_move_occupied(move);
+    return rooks_moves;
+}
 
-        if (move_occupation == 1) {
-            break;
-        }
-        rooks_moves |= move;
-        if (move_occupation == 2) {
-            break;
-        }
-    }
 
-    move = rook_board;
-    while (!(move & RANK_1)) {
-        move >>= 8;
-        move_occupation = check_move_occupied(move);
+Bitboard generate_all_rooks_moves(Bitboard rook_board) {
+    Bitboard rooks_moves = 0ULL;
 
-        if (move_occupation == 1) {
-            break;
-        }
-        rooks_moves |= move;
-        if (move_occupation == 2) {
-            break;
-        }
-    }
-
-    move = rook_board;
-    while (!(move & RANK_8)) {
-        move <<= 8;
-        move_occupation = check_move_occupied(move);
-
-        if (move_occupation == 1) {
-            break;
-        }
-        rooks_moves |= move;
-        if (move_occupation == 2) {
-            break;
-        }
-    }
+    rooks_moves |= slide_rook(rook_board, -1, FILE_A);
+    rooks_moves |= slide_rook(rook_board, 1, FILE_H);
+    rooks_moves |= slide_rook(rook_board, -8, RANK_1);
+    rooks_moves |= slide_rook(rook_board, 8, RANK_8);
 
     return rooks_moves;
 }
@@ -172,7 +136,7 @@ int main()
     // print_bitboard(test_board);
     std::cout << std::endl;
     Bitboard test_board_1 = 0x0000040000000000ULL;
-    print_bitboard(test_board_1);
+    print_bitboard(BOUNDARIES);
     print_bitboard(generate_all_rooks_moves(test_board_1));
 
 
