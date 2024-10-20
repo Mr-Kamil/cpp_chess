@@ -68,20 +68,6 @@ Bitboard generate_all_rooks_moves(Bitboard rook_board)
     int move_occupation;
 
     move = rook_board;
-    while (!(move & FILE_H)) {
-        move >>= 1;
-        move_occupation = check_move_occupied(move);
-
-        if (move_occupation == 1) {
-            break;
-        }
-        rooks_moves |= move;
-        if (move_occupation == 2) {
-            break;
-        }
-    }
-
-    move = rook_board;
     while (!(move & FILE_A)) {
         move >>= 1;
         move_occupation = check_move_occupied(move);
@@ -96,8 +82,8 @@ Bitboard generate_all_rooks_moves(Bitboard rook_board)
     }
 
     move = rook_board;
-    while (!(move & RANK_8)) {
-        move >>= 8;
+    while (!(move & FILE_H)) {
+        move <<= 1;
         move_occupation = check_move_occupied(move);
 
         if (move_occupation == 1) {
@@ -111,6 +97,20 @@ Bitboard generate_all_rooks_moves(Bitboard rook_board)
 
     move = rook_board;
     while (!(move & RANK_1)) {
+        move >>= 8;
+        move_occupation = check_move_occupied(move);
+
+        if (move_occupation == 1) {
+            break;
+        }
+        rooks_moves |= move;
+        if (move_occupation == 2) {
+            break;
+        }
+    }
+
+    move = rook_board;
+    while (!(move & RANK_8)) {
         move <<= 8;
         move_occupation = check_move_occupied(move);
 
@@ -127,10 +127,12 @@ Bitboard generate_all_rooks_moves(Bitboard rook_board)
 }
 
 
-Bitboard generate_all_bishops_moves(Bitboard rook_board)
+Bitboard generate_all_bishops_moves(Bitboard bishop_board)
 {
-    Bitboard rooks_moves = 0ULL;
-    return rooks_moves;
+    Bitboard bishop_moves = 0ULL;
+    Bitboard move;
+    int move_occupation;
+    return bishop_moves;
 }
 
 
@@ -167,8 +169,11 @@ Bitboard generate_all_queens_moves(Bitboard rook_board)
 int main() 
 {
     std::cout << std::endl;
-    print_bitboard(test_board);
+    // print_bitboard(test_board);
     std::cout << std::endl;
+    Bitboard test_board_1 = 0x0000040000000000ULL;
+    print_bitboard(test_board_1);
+    print_bitboard(generate_all_rooks_moves(test_board_1));
 
 
     return 0;
