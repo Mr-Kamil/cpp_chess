@@ -20,9 +20,23 @@ bits:    1  0  0  0  0  0  0  0  0  1     bytes: 0
 
 
 const Bitboard FILE_A = 0x01'01'01'01'01'01'01'01ULL;
+const Bitboard FILE_B = 0x02'02'02'02'02'02'02'02ULL;
+const Bitboard FILE_C = 0x04'04'04'04'04'04'04'04ULL;
+const Bitboard FILE_D = 0x08'08'08'08'08'08'08'08ULL;
+const Bitboard FILE_E = 0x10'10'10'10'10'10'10'10ULL;
+const Bitboard FILE_F = 0x20'20'20'20'20'20'20'20ULL;
+const Bitboard FILE_G = 0x40'40'40'40'40'40'40'40ULL;
 const Bitboard FILE_H = 0x80'80'80'80'80'80'80'80ULL;
+
 const Bitboard RANK_1 = 0x00'00'00'00'00'00'00'FFULL;
+const Bitboard RANK_2 = 0x00'00'00'00'00'00'FF'00ULL;
+const Bitboard RANK_3 = 0x00'00'00'00'00'FF'00'00ULL;
+const Bitboard RANK_4 = 0x00'00'00'00'FF'00'00'00ULL;
+const Bitboard RANK_5 = 0x00'00'00'FF'00'00'00'00ULL;
+const Bitboard RANK_6 = 0x00'00'FF'00'00'00'00'00ULL;
+const Bitboard RANK_7 = 0x00'FF'00'00'00'00'00'00ULL;
 const Bitboard RANK_8 = 0xFF'00'00'00'00'00'00'00ULL;
+
 const Bitboard BOUNDARIES = FILE_A | FILE_H | RANK_1 | RANK_8; // 0xFF'81'81'81'81'81'81'FFULL;
 
 
@@ -126,9 +140,36 @@ Bitboard generate_all_bishops_moves(Bitboard bishop_board)
 }
 
 
+Bitboard slide_knight(Bitboard knight_position, int shift, Bitboard boundary_mask) {
+    Bitboard knights_moves = 0ULL;
+    Bitboard move = knight_position;
+
+    if (!(move & boundary_mask)) {
+        move = (shift > 0) ? (move << shift) : (move >> -shift);
+
+        int move_occupation = check_move_occupied(move);
+        if (move_occupation == 1); 
+        knights_moves |= move;                   
+        if (move_occupation == 2); 
+    }
+
+    return knights_moves;
+}
+
+
 Bitboard generate_all_knights_moves(Bitboard knights_board)
 {
     Bitboard knights_moves = 0ULL;
+
+    knights_moves |= slide_knight(knights_board, 15, RANK_8 | RANK_7 | FILE_A);
+    knights_moves |= slide_knight(knights_board, 17, RANK_8 | RANK_7 | FILE_H);
+    knights_moves |= slide_knight(knights_board, 6, RANK_8 | FILE_A | FILE_B);
+    knights_moves |= slide_knight(knights_board, 10, RANK_8 | FILE_G | FILE_H);
+    knights_moves |= slide_knight(knights_board, -15, RANK_1 | RANK_2 | FILE_H);
+    knights_moves |= slide_knight(knights_board, -17, RANK_1 | RANK_2 | FILE_H);
+    knights_moves |= slide_knight(knights_board, -6, FILE_H | FILE_G | RANK_1);
+    knights_moves |= slide_knight(knights_board, -10, FILE_A | FILE_B | RANK_1);
+
     return knights_moves;
 }
 
@@ -203,6 +244,7 @@ int main()
     print_graphic_bitboard(generate_all_queens_moves(test_board_1));
 
     std::cout << "KNIGHT: " << std::endl;
+    print_graphic_bitboard(generate_all_knights_moves(test_board_1));
     
     std::cout << "PAWN: " << std::endl;
 
