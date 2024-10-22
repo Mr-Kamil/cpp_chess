@@ -6,15 +6,27 @@ typedef uint64_t Bitboard;
 std::string bitboard_representation = R"(
 Bitboard
             A  B  C  D  E  F  G  H
-bits:    8  0  0  0  0  0  0  0  0  8     bytes: 0
-bits:    7  0  0  0  0  0  0  0  0  7     bytes: 0
-bits:    6  0  0  0  0  0  0  0  0  6     bytes: 0
-bits:    6  0  0  0  0  0  0  0  0  5     bytes: 0
-bits:    4  0  0  0  0  0  0  0  0  4     bytes: 0
-bits:    3  0  0  0  0  0  0  0  0  3     bytes: 0
-bits:    2  0  0  0  0  0  0  0  0  2     bytes: 0
-bits:    1  0  0  0  0  0  0  0  0  1     bytes: 0
+bits:    8  0  0  0  0  0  0  0  1  8     bytes: 0x80'00'00'00'00'00'00'00ULL
+bits:    7  0  0  0  0  0  0  1  0  7     bytes: 0x00'40'00'00'00'00'00'00ULL
+bits:    6  0  0  0  0  0  1  0  0  6     bytes: 0x00'00'20'00'00'00'00'00ULL
+bits:    5  0  0  0  0  1  0  0  0  5     bytes: 0x00'00'00'10'00'00'00'00ULL
+bits:    4  0  0  0  1  0  0  0  0  4     bytes: 0x00'00'00'00'08'00'00'00ULL
+bits:    3  0  0  1  0  0  0  0  0  3     bytes: 0x00'00'00'00'00'04'00'00ULL
+bits:    2  0  1  0  0  0  0  0  0  2     bytes: 0x00'00'00'00'00'00'02'00ULL
+bits:    1  1  0  0  0  0  0  0  0  1     bytes: 0x00'00'00'00'00'00'00'01ULL
             A  B  C  D  E  F  G  H
+
+            A  B  C  D  E  F  G  H
+         8  r  n  b  q  k  b  n  r  8     
+         7  p  p  p  p  p  p  p  p  7     
+         6  0  0  0  0  0  0  0  0  6     
+         5  0  0  0  0  0  0  0  0  5     
+         4  0  0  0  0  0  0  0  0  4     
+         3  0  0  0  0  0  0  0  0  3     
+         2  P  P  P  P  P  P  P  P  2     
+         1  R  N  B  Q  K  B  N  R  1     
+            A  B  C  D  E  F  G  H
+
 )";
 
 const Bitboard FILE_A = 0x01'01'01'01'01'01'01'01ULL;
@@ -37,11 +49,45 @@ const Bitboard RANK_8 = 0xFF'00'00'00'00'00'00'00ULL;
 
 const Bitboard BOUNDARIES = FILE_A | FILE_H | RANK_1 | RANK_8; // 0xFF'81'81'81'81'81'81'FFULL;
 
-Bitboard white_board = 0ULL;
-Bitboard black_board = 0ULL;
 
-Bitboard enemy_board = 0x00'00'00'00'00'08'00'00ULL;
-Bitboard allies_board = 0x00'00'00'00'00'00'40'00ULL;
+Bitboard white_pawns = 0x00'00'00'00'00'00'FF'00ULL;
+Bitboard white_knights = 0x00'00'00'00'00'00'00'42ULL;
+Bitboard white_rooks = 0x00'00'00'00'00'00'00'81ULL;
+Bitboard white_bishops = 0x00'00'00'00'00'00'00'24ULL;
+Bitboard white_queens = 0x00'00'00'00'00'00'00'08ULL;
+Bitboard white_king = 0x00'00'00'00'00'00'00'10ULL;
+
+Bitboard black_pawns = 0x00'FF'00'00'00'00'00'00ULL;
+Bitboard black_knights = 0x42'00'00'00'00'00'00'00ULL;
+Bitboard black_rooks = 0x81'00'00'00'00'00'00'00ULL;
+Bitboard black_bishops = 0x24'00'00'00'00'00'00'00ULL;
+Bitboard black_queens = 0x08'00'00'00'00'00'00'00ULL;
+Bitboard black_king = 0x10'00'00'00'00'00'00'00ULL;
+
+Bitboard white_board = white_pawns | white_knights | white_rooks |
+                       white_bishops | white_queens | white_king;
+Bitboard black_board = black_pawns | black_knights | black_rooks |
+                       black_bishops | black_queens | black_king;
+Bitboard full_board = white_board | black_board;
+
+bool white_king_side_castling = true;
+bool white_queen_side_castling = true;
+
+bool black_king_side_castling = true;
+bool black_queen_side_castling = true;
+
+
+bool white_to_move = true;
+bool en_passant = false;
+Bitboard last_move_begin = 0ULL;
+Bitboard last_move_end = 0ULL;
+
+
+Bitboard white_board_test = 0ULL;
+Bitboard black_board_test = 0ULL;
+
+Bitboard enemy_board_test = 0x00'00'00'00'00'08'00'00ULL;
+Bitboard allies_board_test = 0x00'00'00'00'00'00'40'00ULL;
 
 
 void print_bitboard_as_bytes(Bitboard board)
@@ -69,9 +115,12 @@ void print_graphic_bitboard(Bitboard board)
 
 int check_move_occupied(Bitboard move)
 {
-    if (move & enemy_board) {
+    Bitboard enemy_board = 0ULL;
+    enemy_board = white_to_move ? black_board : white_board;
+
+    if (move & enemy_board_test) {
         return 2;
-    } else if (move & allies_board) {
+    } else if (move & allies_board_test) {
         return 1;
     } else {
         return 0;
@@ -148,6 +197,68 @@ Bitboard generate_all_queens_moves(Bitboard queen_board)
 }
 
 
+Bitboard make_queen_side_castling(Bitboard king_board, bool white_to_move=true)
+{
+    Bitboard queen_castling = 0ULL;
+    Bitboard queen_castling_squares = 0ULL;
+
+    if (white_to_move) {
+        queen_castling_squares = 0x00'00'00'00'00'00'00'0EULL;
+    } else {
+        queen_castling_squares = 0x0E'00'00'00'00'00'00'00ULL;
+    }
+
+    if (!(queen_castling_squares & full_board)) {
+        if (white_to_move && white_queen_side_castling) {
+            queen_castling = 0x00'00'00'00'00'00'00'04ULL;
+        } else if (black_queen_side_castling) {
+            queen_castling = 0x04'00'00'00'00'00'00'00ULL;
+        }
+    }
+
+    return queen_castling;
+}
+
+
+Bitboard make_king_side_castling(Bitboard king_board, bool white_to_move)
+{
+    Bitboard king_castling = 0ULL;
+    Bitboard king_castling_squares = 0ULL;
+
+    if (white_to_move) {
+        king_castling_squares = 0x00'00'00'00'00'00'00'60ULL;
+    } else {
+        king_castling_squares = 0x60'00'00'00'00'00'00'00ULL;
+    }
+
+    if (!(king_castling_squares & full_board)) {
+        if (white_to_move && white_king_side_castling) {
+            king_castling = 0x00'00'00'00'00'00'00'40ULL;
+        } else if (black_king_side_castling) {
+            king_castling = 0x40'00'00'00'00'00'00'00ULL;
+        }
+    }
+
+    return king_castling;
+}
+
+
+Bitboard generate_all_kings_moves(Bitboard king_board, bool white_to_move=true)
+{
+    Bitboard king_moves = 0ULL;
+
+    king_moves |= slide_piece(king_board, -1, FILE_A, true);
+    king_moves |= slide_piece(king_board, 1, FILE_H, true);
+    king_moves |= slide_piece(king_board, -8, RANK_1, true);
+    king_moves |= slide_piece(king_board, 8, RANK_8, true);
+
+    king_moves |= make_queen_side_castling(king_board, white_to_move);
+    king_moves |= make_king_side_castling(king_board, white_to_move);
+
+    return king_moves;
+}
+
+
 Bitboard slide_pawn(Bitboard pawn_position, int shift, Bitboard boundary_mask) 
 {
     Bitboard pawns_moves = 0ULL;
@@ -203,6 +314,36 @@ Bitboard capture_pawn(Bitboard pawn_position, int shift, Bitboard boundary_mask)
 }
 
 
+Bitboard en_passant_move(Bitboard pawn_position) 
+{
+    Bitboard en_passant_move = 0ULL;
+    Bitboard pawns_start_squares = 0ULL;
+
+    if (white_to_move) {
+        pawns_start_squares = RANK_5;
+    } else {
+        pawns_start_squares = RANK_4;
+    }
+
+    if (en_passant && (pawn_position & pawns_start_squares)) {
+        if ((pawn_position << 1) == last_move_end) {
+            if (white_to_move) {
+                en_passant_move = pawn_position << 9;
+            } else {
+                en_passant_move = pawn_position >> 7;
+            }
+        } else if ((pawn_position >> 1) == last_move_end) {
+            if (white_to_move) {
+                en_passant_move = pawn_position << 7;
+            } else {
+                en_passant_move = pawn_position >> 9;
+            }
+        }
+    }
+    return en_passant_move;
+}
+
+
 Bitboard generate_all_pawns_moves(Bitboard pawn_board, bool white_to_move=true)
 {
     Bitboard pawns_moves = 0ULL;
@@ -222,20 +363,9 @@ Bitboard generate_all_pawns_moves(Bitboard pawn_board, bool white_to_move=true)
             pawns_moves |= slide_double_pawn(pawn_board, -16);
         }
     }
+    pawns_moves |= en_passant_move(pawn_board);
+
     return pawns_moves;
-}
-
-
-Bitboard generate_all_kings_moves(Bitboard king_board)
-{
-    Bitboard king_moves = 0ULL;
-
-    king_moves |= slide_piece(king_board, -1, FILE_A, true);
-    king_moves |= slide_piece(king_board, 1, FILE_H, true);
-    king_moves |= slide_piece(king_board, -8, RANK_1, true);
-    king_moves |= slide_piece(king_board, 8, RANK_8, true);
-
-    return king_moves;
 }
 
 
@@ -249,12 +379,12 @@ int main()
     print_graphic_bitboard(demonstrative_board);
 
     std::cout << "ALLIES BOARD: " << std::endl;
-    print_bitboard_as_bytes(allies_board);
-    print_graphic_bitboard(allies_board);
+    print_bitboard_as_bytes(allies_board_test);
+    print_graphic_bitboard(allies_board_test);
 
     std::cout << "ENEMY BOARD: " << std::endl;
-    print_bitboard_as_bytes(enemy_board);
-    print_graphic_bitboard(enemy_board);
+    print_bitboard_as_bytes(enemy_board_test);
+    print_graphic_bitboard(enemy_board_test);
 
     Bitboard test_board_1 = 0x0000000000000400ULL;
     std::cout << "TEST BOARD: " << std::endl;
