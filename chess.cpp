@@ -43,7 +43,7 @@ const Bitboard BOUNDARIES = FILE_A | FILE_H | RANK_1 | RANK_8; // 0xFF'81'81'81'
 Bitboard white_board = 0ULL;
 Bitboard black_board = 0ULL;
 
-Bitboard enemy_board = 0ULL;
+Bitboard enemy_board = 0x00'00'00'00'00'04'00'00ULL;
 Bitboard allies_board = 0ULL;
 
 
@@ -174,9 +174,79 @@ Bitboard generate_all_knights_moves(Bitboard knights_board)
 }
 
 
-Bitboard generate_all_pawns_moves(Bitboard pawns_board)
+Bitboard slide_pawn(Bitboard pawn_position, int shift, Bitboard boundary_mask) {
+    Bitboard pawns_moves = 0ULL;
+    Bitboard move = pawn_position;
+
+    if (!(move & boundary_mask)) {
+        move = (shift > 0) ? (move << shift) : (move >> -shift);
+
+        int move_occupation = check_move_occupied(move);
+        if (!((move_occupation == 1) || (move_occupation == 2))) {
+            pawns_moves |= move;                   
+        } 
+    }
+    return pawns_moves;
+}
+
+
+Bitboard slide_double_pawn(Bitboard pawn_position, int shift) {
+    Bitboard pawns_moves = 0ULL;
+    Bitboard move_double = pawn_position;
+    Bitboard square_passed = pawn_position;
+
+    move_double = (shift > 0) ? (move_double << shift) : (move_double >> -shift);
+    square_passed = (shift > 0) ? (move_double << (shift - 8)) : (move_double >> (-shift + 8));
+
+    int move_double_occupation = check_move_occupied(move_double);
+    int square_passed_occupation = check_move_occupied(square_passed);
+
+    if (!(move_double_occupation | square_passed_occupation)) {
+        pawns_moves |= move_double;                   
+    }
+
+    return pawns_moves;
+}
+
+
+Bitboard capture_pawn(Bitboard pawn_position, int shift, Bitboard boundary_mask) {
+    Bitboard pawns_moves = 0ULL;
+    Bitboard move = pawn_position;
+
+    if (!(move & boundary_mask)) {
+        move = (shift > 0) ? (move << shift) : (move >> -shift);
+
+        int move_occupation = check_move_occupied(move);                
+        if (move_occupation == 2) {
+            pawns_moves |= move;                   
+        }
+    }
+
+    return pawns_moves;
+}
+
+
+Bitboard generate_all_pawns_moves(Bitboard pawn_board, bool white_to_move=true)
 {
     Bitboard pawns_moves = 0ULL;
+
+    if (white_to_move) {
+        pawns_moves |= slide_pawn(pawn_board, 8, RANK_8);
+        pawns_moves |= capture_pawn(pawn_board, 7, RANK_8 | FILE_A);
+        pawns_moves |= capture_pawn(pawn_board, 9, RANK_8 | FILE_H);
+        if(pawn_board & RANK_2) {
+            pawns_moves |= slide_double_pawn(pawn_board, 16);
+        }
+    } else {
+        pawns_moves |= slide_pawn(pawn_board, -8, RANK_1);
+        pawns_moves |= capture_pawn(pawn_board, -7, RANK_1 | FILE_H);
+        pawns_moves |= capture_pawn(pawn_board, -9, RANK_1 | FILE_A);
+        if(pawn_board & RANK_7) {
+            pawns_moves |= slide_double_pawn(pawn_board, -16);
+        }
+    }
+
+
     return pawns_moves;
 }
 
@@ -227,7 +297,7 @@ int main()
     print_bitboard_as_bytes(demonstrative_board);
     print_graphic_bitboard(demonstrative_board);
 
-    Bitboard test_board_1 = 0x0000040000000000ULL;
+    Bitboard test_board_1 = 0x0000000000000200ULL;
     std::cout << "TEST BOARD: " << std::endl;
     print_graphic_bitboard(test_board_1);
 
@@ -247,6 +317,7 @@ int main()
     print_graphic_bitboard(generate_all_knights_moves(test_board_1));
     
     std::cout << "PAWN: " << std::endl;
+    print_graphic_bitboard(generate_all_pawns_moves(test_board_1));
 
     return 0;
 }
