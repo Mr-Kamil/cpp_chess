@@ -70,6 +70,13 @@ Bitboard black_board = black_pawns | black_knights | black_rooks |
                        black_bishops | black_queens | black_king;
 Bitboard full_board = white_board | black_board;
 
+
+const char EMPTY = '0';
+const char PAWN_WHITE = 'P', KNIGHT_WHITE = 'N', BISHOP_WHITE = 'B', 
+           ROOK_WHITE = 'R', QUEEN_WHITE = 'Q', KING_WHITE = 'K';
+const char PAWN_BLACK = 'p', KNIGHT_BLACK = 'n', BISHOP_BLACK = 'b', 
+           ROOK_BLACK = 'r', QUEEN_BLACK = 'q', KING_BLACK = 'k';
+
 bool white_king_side_castling = true;
 bool white_queen_side_castling = true;
 
@@ -88,6 +95,38 @@ Bitboard black_board_test = 0ULL;
 
 Bitboard enemy_board_test = 0x00'00'00'00'00'08'00'00ULL;
 Bitboard allies_board_test = 0x00'00'00'00'00'00'40'00ULL;
+
+
+char* get_char_list_board(
+    Bitboard white_pawns, Bitboard white_knights, Bitboard white_rooks, 
+    Bitboard white_bishops, Bitboard white_queens, Bitboard white_king,
+    Bitboard black_pawns, Bitboard black_knights, Bitboard black_rooks, 
+    Bitboard black_bishops, Bitboard black_queens, Bitboard black_king
+    )
+{
+    char* char_board = new char[64];
+
+    for (int n = 0; n < 64; ++n) {
+        Bitboard position = 1ULL << n;
+
+        if (white_pawns & position) char_board[n] = PAWN_WHITE;
+        else if (white_knights & position) char_board[n] = KNIGHT_WHITE;
+        else if (white_bishops & position) char_board[n] = BISHOP_WHITE;
+        else if (white_rooks & position) char_board[n] = ROOK_WHITE;
+        else if (white_queens & position) char_board[n] = QUEEN_WHITE;
+        else if (white_king & position) char_board[n] = KING_WHITE;
+
+        else if (black_pawns & position) char_board[n] = PAWN_BLACK;
+        else if (black_knights & position) char_board[n] = KNIGHT_BLACK;
+        else if (black_bishops & position) char_board[n] = BISHOP_BLACK;
+        else if (black_rooks & position) char_board[n] = ROOK_BLACK;
+        else if (black_queens & position) char_board[n] = QUEEN_BLACK;
+        else if (black_king & position) char_board[n] = KING_BLACK;
+        
+        else char_board[n] = EMPTY;
+    }
+    return char_board;
+}
 
 
 void print_bitboard_as_bytes(Bitboard board)
@@ -128,7 +167,10 @@ int check_move_occupied(Bitboard move)
 }
 
 
-Bitboard slide_piece(Bitboard piece_position, int shift, Bitboard boundary_mask, bool single_move=false) 
+Bitboard slide_piece(
+    Bitboard piece_position, int shift, Bitboard boundary_mask, 
+    bool single_move=false
+    ) 
 {
     Bitboard piece_moves = 0ULL;
     Bitboard move = piece_position;
@@ -192,7 +234,8 @@ Bitboard generate_all_knights_moves(Bitboard knights_board)
 
 Bitboard generate_all_queens_moves(Bitboard queen_board)
 {
-    Bitboard queens_moves = generate_all_bishops_moves(queen_board) | generate_all_rooks_moves(queen_board);
+    Bitboard queens_moves = generate_all_bishops_moves(
+        queen_board) | generate_all_rooks_moves(queen_board);
     return queens_moves;
 }
 
@@ -408,6 +451,19 @@ int main()
     
     std::cout << "PAWN: " << std::endl;
     print_graphic_bitboard(generate_all_pawns_moves(test_board_1));
+
+    std::cout << " CHAR BOARD: " << std::endl;
+    char* char_board = get_char_list_board(
+        white_pawns, white_knights, white_rooks, 
+        white_bishops, white_queens, white_king,
+        black_pawns, black_knights, black_rooks, 
+        black_bishops, black_queens, black_king
+    );
+    for (int n = 63; n >= 0; n--) {
+        std::cout << ' ' << char_board[n];
+        if (n % 8 == 0) std::cout << std::endl;
+    }
+    delete[] char_board;
 
     return 0;
 }
