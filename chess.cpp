@@ -129,6 +129,76 @@ char* get_char_list_board(
 }
 
 
+void get_bitboards_from_char_list(
+    const char* char_board,
+    Bitboard &white_pawns, Bitboard &white_knights, Bitboard &white_rooks, 
+    Bitboard &white_bishops, Bitboard &white_queens, Bitboard &white_king,
+    Bitboard &black_pawns, Bitboard &black_knights, Bitboard &black_rooks, 
+    Bitboard &black_bishops, Bitboard &black_queens, Bitboard &black_king
+) {
+    white_pawns = 0ULL;
+    white_knights = 0ULL;
+    white_rooks = 0ULL;
+    white_bishops = 0ULL;
+    white_queens = 0ULL;
+    white_king = 0ULL;
+
+    black_pawns = 0ULL;
+    black_knights = 0ULL;
+    black_rooks = 0ULL;
+    black_bishops = 0ULL;
+    black_queens = 0ULL;
+    black_king = 0ULL;
+
+    for (int n = 0; n < 64; ++n) {
+        Bitboard position = 1ULL << n;
+
+        switch (char_board[n]) {
+            case PAWN_WHITE:
+                white_pawns |= position;
+                break;
+            case KNIGHT_WHITE:
+                white_knights |= position;
+                break;
+            case BISHOP_WHITE:
+                white_bishops |= position;
+                break;
+            case ROOK_WHITE:
+                white_rooks |= position;
+                break;
+            case QUEEN_WHITE:
+                white_queens |= position;
+                break;
+            case KING_WHITE:
+                white_king |= position;
+                break;
+
+            case PAWN_BLACK:
+                black_pawns |= position;
+                break;
+            case KNIGHT_BLACK:
+                black_knights |= position;
+                break;
+            case BISHOP_BLACK:
+                black_bishops |= position;
+                break;
+            case ROOK_BLACK:
+                black_rooks |= position;
+                break;
+            case QUEEN_BLACK:
+                black_queens |= position;
+                break;
+            case KING_BLACK:
+                black_king |= position;
+                break;
+
+            case EMPTY:
+                break;
+        }
+    }
+}
+
+
 void print_bitboard_as_bytes(Bitboard board)
 {
     std::cout << "Bitboard in hex: 0x" 
