@@ -485,8 +485,122 @@ Bitboard generate_all_pawns_moves(Bitboard pawn_board, bool white_to_move=true)
 }
 
 
+void apply_move_fen(const std::string &fen)
+{
+    // e.g: position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
+    bool white_to_move;
+    int castling_rights; // Bitwise flags for castling rights: 1 = K, 2 = Q, 4 = k, 8 = q
+    int halfmove_clock;
+    int fullmove_number;
+    int en_passant_square = -1; // -1 indicates no en passant square
 
+    Bitboard white_knights = white_bishops = white_rooks = white_queens = white_king = 0;
+    Bitboard black_knights = black_bishops = black_rooks = black_queens = black_king = 0;
+
+    std::istringstream ss(fen);
+    std::string position, active_color, castling, en_passant, halfmove_str, fullmove_str;
+    ss >> position >> active_color >> castling >> en_passant >> halfmove_str >> fullmove_str;
+
+    int rank = 0, file = 0;
+
+    for (char c : position) {
+        if (c == '/') {
+            rank++;
+            file = 0;
+        } else if (isdigit(c)) {
+            file += c - '0';
+        } else {
+            Bitboard piece_mask = (1ULL << (56 - (rank * 8 + file)));
+            switch (c) {
+                case 'P': white_pawns |= piece_mask; break;
+                case 'N': white_knights |= piece_mask; break;
+                case 'B': white_bishops |= piece_mask; break;
+                case 'R': white_rooks |= piece_mask; break;
+                case 'Q': white_queens |= piece_mask; break;
+                case 'K': white_king |= piece_mask; break;
+                case 'p': black_pawns |= piece_mask; break;
+                case 'n': black_knights |= piece_mask; break;
+                case 'b': black_bishops |= piece_mask; break;
+                case 'r': black_rooks |= piece_mask; break;
+                case 'q': black_queens |= piece_mask; break;
+                case 'k': black_king |= piece_mask; break;
+            }
+            file++;
+        }
+    }
+
+    white_to_move = (active_color == "w");
+
+    castling_rights = 0;
+    if (castling.find('K') != std::string::npos) castling_rights |= 1;  // White kingside
+    if (castling.find('Q') != std::string::npos) castling_rights |= 2;  // White queenside
+    if (castling.find('k') != std::string::npos) castling_rights |= 4;  // Black kingside
+    if (castling.find('q') != std::string::npos) castling_rights |= 8;  // Black queenside
+
+    if (en_passant == "-") {
+        en_passant_square = -1;
+    } else {
+        int en_passant_file = en_passant[0] - 'a';
+        int en_passant_rank = en_passant[1] - '1';
+        en_passant_square = (8 * (7 - en_passant_rank)) + en_passant_file;
+    }
+
+    halfmove_clock = std::stoi(halfmove_str);
+    fullmove_number = std::stoi(fullmove_str);
+}
+
+void apply_move_startpos(const std::string &move)
+{
+    // e.g: position startpos moves e2e4 e7e5 g1f3 b8c6
+
+    std::pair<int, int> indicases = move_to_square_indices(move);
+    int source = indicases.first;
+    int target = indicases.second;
+    uint64_t piece_mask = (1ULL << source);
+
+    if (white_pawns & piece_mask) {
+        clear_bit(white_pawns, source);
+        set_bit(white_pawns, target);
+    } else if (white_knights & piece_mask) {
+        clear_bit(white_knights, source);
+        set_bit(white_knights, target);
+    } else if (white_bishops & piece_mask) {
+        clear_bit(white_bishops, source);
+        set_bit(white_bishops, target);
+    } else if (white_rooks & piece_mask) {
+        clear_bit(white_rooks, source);
+        set_bit(white_rooks, target);
+    } else if (white_queens & piece_mask) {
+        clear_bit(white_queens, source);
+        set_bit(white_queens, target);
+    } else if (white_king & piece_mask) {
+        clear_bit(white_king, source);
+        set_bit(white_king, target);
+    } else if (black_pawns & piece_mask) {
+        clear_bit(black_pawns, source);
+        set_bit(black_pawns, target);
+    } else if (black_knights & piece_mask) {
+        clear_bit(black_knights, source);
+        set_bit(black_knights, target);
+    } else if (black_bishops & piece_mask) {
+        clear_bit(black_bishops, source);
+        set_bit(black_bishops, target);
+    } else if (black_rooks & piece_mask) {
+        clear_bit(black_rooks, source);
+        set_bit(black_rooks, target);
+    } else if (black_queens & piece_mask) {
+        clear_bit(black_queens, source);
+        set_bit(black_queens, target);
+    } else if (black_king & piece_mask) {
+        clear_bit(black_king, source);
+        set_bit(black_king, target);
+    }
+
+    white_board = white_pawns | white_knights | white_bishops | white_rooks | white_queens | white_king;
+    black_board = black_pawns | black_knights | black_bishops | black_rooks | black_queens | black_king;
+    full_board = white_board | black_board;
+}
 
 int main() 
 {
