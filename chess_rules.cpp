@@ -137,7 +137,7 @@ void get_bitboards_from_char_list(
     Bitboard &white_bishops, Bitboard &white_queens, Bitboard &white_king,
     Bitboard &black_pawns, Bitboard &black_knights, Bitboard &black_rooks, 
     Bitboard &black_bishops, Bitboard &black_queens, Bitboard &black_king
-) 
+    ) 
 {
     white_pawns = 0ULL;
     white_knights = 0ULL;
