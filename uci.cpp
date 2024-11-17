@@ -15,22 +15,6 @@ void start_new_game()
 
 }
 
-std::pair<int, int> move_to_square_indices(const std::string &move)
-{
-    int source = (move[0] - 'a') + (8 - (move[1] - '1' + 1)) * 8;
-    int target = (move[2] - 'a') + (8 - (move[3] - '1' + 1)) * 8;
-    return {source, target};
-}
-
-void clear_bit(uint64_t &bitboard, int square)
-{
-    bitboard &= ~(1ULL << square);
-}
-
-void set_bit(uint64_t &bitboard, int square)
-{
-    bitboard |= (1ULL << square);
-}
 
 void apply_move_startpos(const std::string &move)
 {

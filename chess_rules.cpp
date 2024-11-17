@@ -485,6 +485,24 @@ Bitboard generate_all_pawns_moves(Bitboard pawn_board, bool white_to_move=true)
 }
 
 
+void clear_bit(uint64_t &bitboard, int square)
+{
+    bitboard &= ~(1ULL << square);
+}
+
+void set_bit(uint64_t &bitboard, int square)
+{
+    bitboard |= (1ULL << square);
+}
+
+
+std::pair<int, int> move_to_square_indices(const std::string &move)
+{
+    int source = (move[0] - 'a') + (8 - (move[1] - '1' + 1)) * 8;
+    int target = (move[2] - 'a') + (8 - (move[3] - '1' + 1)) * 8;
+    return {source, target};
+}
+
 void apply_move_fen(const std::string &fen)
 {
     // e.g: position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
