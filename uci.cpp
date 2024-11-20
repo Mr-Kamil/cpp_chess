@@ -2,6 +2,9 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include "chess_rules.cpp"
+
+ChessRules chess_rules = ChessRules();
 
 
 void reset_board()
@@ -26,20 +29,20 @@ void apply_move_fen(const std::string &fen)
 
 }
 
-void get_best_move()
+std::string get_best_move()
 {
+    return chess_rules.get_best_move();
+}
 
+void handle_isready() 
+{
+    std::cout << "readyok\n";
 }
 
 void identify_engine() 
 {
     std::cout << "id name TryChess 0.1\n";
     std::cout << "id author Kamil Bylinka\n";
-}
-
-void handle_isready() 
-{
-    std::cout << "readyok\n";
 }
 
 void handle_uci() 
@@ -65,20 +68,21 @@ void handle_position(std::stringstream &ss)
         if (ss >> moves && moves == "moves") {
             std::string move;
             while (ss >> move) {
-                apply_move_startpos(move);
+                chess_rules.apply_move_startpos(move);
             }
         }
     } else if (subcommand == "fen") {
         std::string fen;
         std::getline(ss, fen);
-        apply_move_fen(fen);
+        chess_rules.apply_move_fen(fen);
     }
 }
 
 void handle_go(std::stringstream &ss) 
 {
-    std::string searchCommand;
-    ss >> searchCommand;
+    std::string search_command;
+    ss >> search_command;
+    // TODO
     get_best_move();
 
     std::cout << "bestmove xXxX" << std::endl;
