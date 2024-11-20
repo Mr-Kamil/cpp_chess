@@ -2,38 +2,38 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <vector>
 
 typedef uint64_t Bitboard;
+std::string bitboard_representation = R"(
+Bitboard
+            A  B  C  D  E  F  G  H
+bits:    8  0  0  0  0  0  0  0  1  8     bytes: 0x80'00'00'00'00'00'00'00ULL
+bits:    7  0  0  0  0  0  0  1  0  7     bytes: 0x00'40'00'00'00'00'00'00ULL
+bits:    6  0  0  0  0  0  1  0  0  6     bytes: 0x00'00'20'00'00'00'00'00ULL
+bits:    5  0  0  0  0  1  0  0  0  5     bytes: 0x00'00'00'10'00'00'00'00ULL
+bits:    4  0  0  0  1  0  0  0  0  4     bytes: 0x00'00'00'00'08'00'00'00ULL
+bits:    3  0  0  1  0  0  0  0  0  3     bytes: 0x00'00'00'00'00'04'00'00ULL
+bits:    2  0  1  0  0  0  0  0  0  2     bytes: 0x00'00'00'00'00'00'02'00ULL
+bits:    1  1  0  0  0  0  0  0  0  1     bytes: 0x00'00'00'00'00'00'00'01ULL
+            A  B  C  D  E  F  G  H
 
-class ChessRules{
+           A  B  C  D  E  F  G  H
+        8  r  n  b  q  k  b  n  r  8     
+        7  p  p  p  p  p  p  p  p  7     
+        6  0  0  0  0  0  0  0  0  6     
+        5  0  0  0  0  0  0  0  0  5     
+        4  0  0  0  0  0  0  0  0  4     
+        3  0  0  0  0  0  0  0  0  3     
+        2  P  P  P  P  P  P  P  P  2     
+        1  R  N  B  Q  K  B  N  R  1     
+           A  B  C  D  E  F  G  H
 
-private:
-    std::string bitboard_representation = R"(
-    Bitboard
-                A  B  C  D  E  F  G  H
-    bits:    8  0  0  0  0  0  0  0  1  8     bytes: 0x80'00'00'00'00'00'00'00ULL
-    bits:    7  0  0  0  0  0  0  1  0  7     bytes: 0x00'40'00'00'00'00'00'00ULL
-    bits:    6  0  0  0  0  0  1  0  0  6     bytes: 0x00'00'20'00'00'00'00'00ULL
-    bits:    5  0  0  0  0  1  0  0  0  5     bytes: 0x00'00'00'10'00'00'00'00ULL
-    bits:    4  0  0  0  1  0  0  0  0  4     bytes: 0x00'00'00'00'08'00'00'00ULL
-    bits:    3  0  0  1  0  0  0  0  0  3     bytes: 0x00'00'00'00'00'04'00'00ULL
-    bits:    2  0  1  0  0  0  0  0  0  2     bytes: 0x00'00'00'00'00'00'02'00ULL
-    bits:    1  1  0  0  0  0  0  0  0  1     bytes: 0x00'00'00'00'00'00'00'01ULL
-                A  B  C  D  E  F  G  H
+)";
 
-               A  B  C  D  E  F  G  H
-            8  r  n  b  q  k  b  n  r  8     
-            7  p  p  p  p  p  p  p  p  7     
-            6  0  0  0  0  0  0  0  0  6     
-            5  0  0  0  0  0  0  0  0  5     
-            4  0  0  0  0  0  0  0  0  4     
-            3  0  0  0  0  0  0  0  0  3     
-            2  P  P  P  P  P  P  P  P  2     
-            1  R  N  B  Q  K  B  N  R  1     
-               A  B  C  D  E  F  G  H
 
-    )";
-
+class ChessRules
+{
     const Bitboard FILE_A = 0x01'01'01'01'01'01'01'01ULL;
     const Bitboard FILE_B = 0x02'02'02'02'02'02'02'02ULL;
     const Bitboard FILE_C = 0x04'04'04'04'04'04'04'04ULL;
@@ -78,6 +78,7 @@ private:
     Bitboard last_move_begin = 0ULL;
     Bitboard last_move_end = 0ULL;
 
+
     static constexpr char EMPTY = '0';
     static constexpr char PAWN_WHITE = 'P', 
                           KNIGHT_WHITE = 'N', 
@@ -100,6 +101,8 @@ private:
 
     bool white_to_move = true;
     bool en_passant = false;
+
+    std::vector<std::string> move_logs = {};
 
 
 public:
@@ -531,6 +534,60 @@ public:
 
 
 public:
+    void apply_move_startpos(const std::string &move)
+    {
+        // e.g: position startpos moves e2e4 e7e5 g1f3 b8c6
+
+        std::pair<int, int> indicases = move_to_square_indices(move);
+        int source = indicases.first;
+        int target = indicases.second;
+        uint64_t piece_mask = (1ULL << source);
+
+        if (white_pawns & piece_mask) {
+            clear_bit(white_pawns, source);
+            set_bit(white_pawns, target);
+        } else if (white_knights & piece_mask) {
+            clear_bit(white_knights, source);
+            set_bit(white_knights, target);
+        } else if (white_bishops & piece_mask) {
+            clear_bit(white_bishops, source);
+            set_bit(white_bishops, target);
+        } else if (white_rooks & piece_mask) {
+            clear_bit(white_rooks, source);
+            set_bit(white_rooks, target);
+        } else if (white_queens & piece_mask) {
+            clear_bit(white_queens, source);
+            set_bit(white_queens, target);
+        } else if (white_king & piece_mask) {
+            clear_bit(white_king, source);
+            set_bit(white_king, target);
+        } else if (black_pawns & piece_mask) {
+            clear_bit(black_pawns, source);
+            set_bit(black_pawns, target);
+        } else if (black_knights & piece_mask) {
+            clear_bit(black_knights, source);
+            set_bit(black_knights, target);
+        } else if (black_bishops & piece_mask) {
+            clear_bit(black_bishops, source);
+            set_bit(black_bishops, target);
+        } else if (black_rooks & piece_mask) {
+            clear_bit(black_rooks, source);
+            set_bit(black_rooks, target);
+        } else if (black_queens & piece_mask) {
+            clear_bit(black_queens, source);
+            set_bit(black_queens, target);
+        } else if (black_king & piece_mask) {
+            clear_bit(black_king, source);
+            set_bit(black_king, target);
+        }
+
+        this->white_board = this->white_pawns | this->white_knights | this->white_bishops | this->white_rooks | white_queens | this->white_king;
+        this->black_board = this->black_pawns | this->black_knights | this->black_bishops | this->black_rooks | black_queens | this->black_king;
+        this->full_board = this->white_board | this->black_board;
+    }
+
+
+public:
     void apply_move_fen(const std::string &fen)
     {
         // e.g: position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
@@ -597,60 +654,125 @@ public:
     }
 
 
-public:
-    void apply_move_startpos(const std::string &move)
+private:
+    void update_all_moves(std::vector<std::string> &all_moves, Bitboard start, Bitboard ends)
     {
-        // e.g: position startpos moves e2e4 e7e5 g1f3 b8c6
-
-        std::pair<int, int> indicases = move_to_square_indices(move);
-        int source = indicases.first;
-        int target = indicases.second;
-        uint64_t piece_mask = (1ULL << source);
-
-        if (white_pawns & piece_mask) {
-            clear_bit(white_pawns, source);
-            set_bit(white_pawns, target);
-        } else if (white_knights & piece_mask) {
-            clear_bit(white_knights, source);
-            set_bit(white_knights, target);
-        } else if (white_bishops & piece_mask) {
-            clear_bit(white_bishops, source);
-            set_bit(white_bishops, target);
-        } else if (white_rooks & piece_mask) {
-            clear_bit(white_rooks, source);
-            set_bit(white_rooks, target);
-        } else if (white_queens & piece_mask) {
-            clear_bit(white_queens, source);
-            set_bit(white_queens, target);
-        } else if (white_king & piece_mask) {
-            clear_bit(white_king, source);
-            set_bit(white_king, target);
-        } else if (black_pawns & piece_mask) {
-            clear_bit(black_pawns, source);
-            set_bit(black_pawns, target);
-        } else if (black_knights & piece_mask) {
-            clear_bit(black_knights, source);
-            set_bit(black_knights, target);
-        } else if (black_bishops & piece_mask) {
-            clear_bit(black_bishops, source);
-            set_bit(black_bishops, target);
-        } else if (black_rooks & piece_mask) {
-            clear_bit(black_rooks, source);
-            set_bit(black_rooks, target);
-        } else if (black_queens & piece_mask) {
-            clear_bit(black_queens, source);
-            set_bit(black_queens, target);
-        } else if (black_king & piece_mask) {
-            clear_bit(black_king, source);
-            set_bit(black_king, target);
+        for (int index = 0; index < 64; index++) {
+            if (ends & (1ULL << index)) {
+                all_moves.push_back(this->bitboards_to_move(start, 1ULL << index));
+            }
         }
-
-        white_board = white_pawns | white_knights | white_bishops | white_rooks | white_queens | white_king;
-        black_board = black_pawns | black_knights | black_bishops | black_rooks | black_queens | black_king;
-        full_board = white_board | black_board;
     }
-}
 
+
+public:
+    void get_all_moves()
+    {
+        int index = 0;
+        Bitboard moves;
+        std::vector<std::string> all_moves;
+
+        while (index < 64) {
+            moves = 0ULL;
+
+            if (this->white_to_move) {
+                if (this->white_board & (1ULL << index)) {
+                    if (this->white_pawns & (1ULL << index)) {
+                        moves = this->generate_all_pawns_moves(1ULL << index);
+                    } else if (this->white_rooks & (1ULL << index)) {
+                        moves = this->generate_all_rooks_moves(1ULL << index);
+                    } else if (this->white_knights & (1ULL << index)) {
+                        moves = this->generate_all_knights_moves(1ULL << index);
+                    } else if (this->white_bishops & (1ULL << index)) {
+                        moves = this->generate_all_bishops_moves(1ULL << index);
+                    } else if (this->white_queens & (1ULL << index)) {
+                        moves = this->generate_all_queens_moves(1ULL << index);
+                    } else if (this->white_king & (1ULL << index)) {
+                        moves = this->generate_all_kings_moves(1ULL << index);
+                    }
+                }
+            } else {
+                if (this->black_board & (1ULL << index)) {
+                    if (this->black_pawns & (1ULL << index)) {
+                        moves = this->generate_all_pawns_moves(1ULL << index);
+                    } else if (this->black_rooks & (1ULL << index)) {
+                        moves = this->generate_all_rooks_moves(1ULL << index);
+                    } else if (this->black_knights & (1ULL << index)) {
+                        moves = this->generate_all_knights_moves(1ULL << index);
+                    } else if (this->black_bishops & (1ULL << index)) {
+                        moves = this->generate_all_bishops_moves(1ULL << index);
+                    } else if (this->black_queens & (1ULL << index)) {
+                        moves = this->generate_all_queens_moves(1ULL << index);
+                    } else if (this->black_king & (1ULL << index)) {
+                        moves = this->generate_all_kings_moves(1ULL << index);
+                    }
+                }
+            }
+
+            this->update_all_moves(all_moves, 1ULL << index, moves);
+            index++;
+        }
+    }
+
+
+public:
+    void check_is_move_valid()
+    {
+
+    }
+
+
+public:
+    void make_move()
+    {
+        
+    }
+
+
+public:
+    void undo_move()
+    {
+
+    }
+
+
+    int bitboard_to_index(Bitboard bb) 
+    {
+        int index = 0;
+
+        while (bb != 0) {
+            if (bb & 1) {
+                return index;
+            }
+            bb >>= 1;
+            index++;
+        }
+        return -1;
+    }
+
+
+    std::string index_to_square(int index) 
+    {
+        int file = index % 8;
+        int rank = index / 8;
+        char file_char = 'a' + file;
+        char rank_char = '1' + rank;
+        return std::string() + file_char + rank_char;
+    }
+
+
+    std::string bitboards_to_move(Bitboard move_begin, Bitboard move_end) 
+    {
+        int begin_index = bitboard_to_index(move_begin);
+        int end_index = bitboard_to_index(move_end);
+
+        std::string begin_square = index_to_square(begin_index);
+        std::string end_square = index_to_square(end_index);
+
+        return begin_square + end_square;
+    }
+
+}
 
 // int main() 
 // {
