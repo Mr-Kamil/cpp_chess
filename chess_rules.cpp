@@ -5,31 +5,31 @@
 #include <vector>
 
 typedef uint64_t Bitboard;
-std::string bitboard_representation = R"(
-Bitboard
-            A  B  C  D  E  F  G  H
-bits:    8  0  0  0  0  0  0  0  1  8     bytes: 0x80'00'00'00'00'00'00'00ULL
-bits:    7  0  0  0  0  0  0  1  0  7     bytes: 0x00'40'00'00'00'00'00'00ULL
-bits:    6  0  0  0  0  0  1  0  0  6     bytes: 0x00'00'20'00'00'00'00'00ULL
-bits:    5  0  0  0  0  1  0  0  0  5     bytes: 0x00'00'00'10'00'00'00'00ULL
-bits:    4  0  0  0  1  0  0  0  0  4     bytes: 0x00'00'00'00'08'00'00'00ULL
-bits:    3  0  0  1  0  0  0  0  0  3     bytes: 0x00'00'00'00'00'04'00'00ULL
-bits:    2  0  1  0  0  0  0  0  0  2     bytes: 0x00'00'00'00'00'00'02'00ULL
-bits:    1  1  0  0  0  0  0  0  0  1     bytes: 0x00'00'00'00'00'00'00'01ULL
-            A  B  C  D  E  F  G  H
+// std::string bitboard_representation = R"(
+// Bitboard
+//             A  B  C  D  E  F  G  H
+// bits:    8  0  0  0  0  0  0  0  1  8     bytes: 0x80'00'00'00'00'00'00'00ULL
+// bits:    7  0  0  0  0  0  0  1  0  7     bytes: 0x00'40'00'00'00'00'00'00ULL
+// bits:    6  0  0  0  0  0  1  0  0  6     bytes: 0x00'00'20'00'00'00'00'00ULL
+// bits:    5  0  0  0  0  1  0  0  0  5     bytes: 0x00'00'00'10'00'00'00'00ULL
+// bits:    4  0  0  0  1  0  0  0  0  4     bytes: 0x00'00'00'00'08'00'00'00ULL
+// bits:    3  0  0  1  0  0  0  0  0  3     bytes: 0x00'00'00'00'00'04'00'00ULL
+// bits:    2  0  1  0  0  0  0  0  0  2     bytes: 0x00'00'00'00'00'00'02'00ULL
+// bits:    1  1  0  0  0  0  0  0  0  1     bytes: 0x00'00'00'00'00'00'00'01ULL
+//             A  B  C  D  E  F  G  H
 
-           A  B  C  D  E  F  G  H
-        8  r  n  b  q  k  b  n  r  8     
-        7  p  p  p  p  p  p  p  p  7     
-        6  0  0  0  0  0  0  0  0  6     
-        5  0  0  0  0  0  0  0  0  5     
-        4  0  0  0  0  0  0  0  0  4     
-        3  0  0  0  0  0  0  0  0  3     
-        2  P  P  P  P  P  P  P  P  2     
-        1  R  N  B  Q  K  B  N  R  1     
-           A  B  C  D  E  F  G  H
+//            A  B  C  D  E  F  G  H
+//         8  r  n  b  q  k  b  n  r  8     
+//         7  p  p  p  p  p  p  p  p  7     
+//         6  0  0  0  0  0  0  0  0  6     
+//         5  0  0  0  0  0  0  0  0  5     
+//         4  0  0  0  0  0  0  0  0  4     
+//         3  0  0  0  0  0  0  0  0  3     
+//         2  P  P  P  P  P  P  P  P  2     
+//         1  R  N  B  Q  K  B  N  R  1     
+//            A  B  C  D  E  F  G  H
 
-)";
+// )";
 
 
 class ChessRules
@@ -101,14 +101,13 @@ class ChessRules
 
     std::vector<std::string> move_logs = {};
 
-
 public:
-    ChessRules() {
+    ChessRules() 
+    {
         this->reset();
     }
 
-
-private:
+public:
     void reset()
     {
     this->white_pawns = 0x00'00'00'00'00'00'FF'00ULL;
@@ -147,31 +146,32 @@ private:
     }
 
 public:
-    char *get_char_list_board(
-        Bitboard white_pawns, Bitboard white_knights, Bitboard white_rooks, 
-        Bitboard white_bishops, Bitboard white_queens, Bitboard white_king,
-        Bitboard black_pawns, Bitboard black_knights, Bitboard black_rooks, 
-        Bitboard black_bishops, Bitboard black_queens, Bitboard black_king
-        )
+    Bitboard get_full_board()
+    {
+        return this->full_board;
+    }
+
+public:
+    char *get_char_list_board()
     {
         char* char_board = new char[64];
 
         for (int n = 0; n < 64; ++n) {
             Bitboard position = 1ULL << n;
 
-            if (white_pawns & position) char_board[n] = this->PAWN_WHITE;
-            else if (white_knights & position) char_board[n] = this->KNIGHT_WHITE;
-            else if (white_bishops & position) char_board[n] = this->BISHOP_WHITE;
-            else if (white_rooks & position) char_board[n] = this->ROOK_WHITE;
-            else if (white_queens & position) char_board[n] = this->QUEEN_WHITE;
-            else if (white_king & position) char_board[n] = this->KING_WHITE;
+            if (this->white_pawns & position) char_board[n] = this->PAWN_WHITE;
+            else if (this->white_knights & position) char_board[n] = this->KNIGHT_WHITE;
+            else if (this->white_bishops & position) char_board[n] = this->BISHOP_WHITE;
+            else if (this->white_rooks & position) char_board[n] = this->ROOK_WHITE;
+            else if (this->white_queens & position) char_board[n] = this->QUEEN_WHITE;
+            else if (this->white_king & position) char_board[n] = this->KING_WHITE;
 
-            else if (black_pawns & position) char_board[n] = this->PAWN_BLACK;
-            else if (black_knights & position) char_board[n] = this->KNIGHT_BLACK;
-            else if (black_bishops & position) char_board[n] = this->BISHOP_BLACK;
-            else if (black_rooks & position) char_board[n] = this->ROOK_BLACK;
-            else if (black_queens & position) char_board[n] = this->QUEEN_BLACK;
-            else if (black_king & position) char_board[n] = this->KING_BLACK;
+            else if (this->black_pawns & position) char_board[n] = this->PAWN_BLACK;
+            else if (this->black_knights & position) char_board[n] = this->KNIGHT_BLACK;
+            else if (this->black_bishops & position) char_board[n] = this->BISHOP_BLACK;
+            else if (this->black_rooks & position) char_board[n] = this->ROOK_BLACK;
+            else if (this->black_queens & position) char_board[n] = this->QUEEN_BLACK;
+            else if (this->black_king & position) char_board[n] = this->KING_BLACK;
             
             else char_board[n] = this->EMPTY;
         }
@@ -180,13 +180,7 @@ public:
 
 
 public:
-    void get_bitboards_from_char_list(
-        const char* char_board,
-        Bitboard &white_pawns, Bitboard &white_knights, Bitboard &white_rooks, 
-        Bitboard &white_bishops, Bitboard &white_queens, Bitboard &white_king,
-        Bitboard &black_pawns, Bitboard &black_knights, Bitboard &black_rooks, 
-        Bitboard &black_bishops, Bitboard &black_queens, Bitboard &black_king
-        ) 
+    void get_bitboards_from_char_list(const char* char_board) 
     {
         white_pawns = 0ULL;
         white_knights = 0ULL;
@@ -629,6 +623,7 @@ public:
                             this->black_bishops | this->black_rooks | 
                             this->black_queens | this->black_king;
         this->full_board = this->white_board | this->black_board;
+        this->white_to_move = !this->white_to_move;
     }
 
 
@@ -714,8 +709,9 @@ public:
     std::vector<std::string> get_all_moves()
     {
         int index = 0;
-        Bitboard moves;
+        Bitboard moves = 0ULL;
         std::vector<std::string> all_moves;
+        all_moves.clear();
 
         while (index < 64) {
             moves = 0ULL;
@@ -770,6 +766,7 @@ public:
         all_moves = this->get_all_moves();
         // TODO
         best_move = all_moves[0];
+        this->white_to_move = !this->white_to_move;
 
         return best_move;
     }
@@ -835,19 +832,19 @@ public:
 };
 
 
-int main() 
-{
-    ChessRules chess_rules = ChessRules();
-    std::vector<std::string> all_moves;
+// int main() 
+// {
+//     ChessRules chess_rules = ChessRules();
+//     std::vector<std::string> all_moves;
 
-    all_moves = chess_rules.get_all_moves();
-
-
-    for (const std::string& move : all_moves) {
-        std::cout << move << std::endl;
-    }
+//     all_moves = chess_rules.get_all_moves();
 
 
+//     for (const std::string& move : all_moves) {
+//         std::cout << move << std::endl;
+//     }
 
-    return 0;
-}
+
+
+//     return 0;
+// }

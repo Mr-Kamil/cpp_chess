@@ -2,65 +2,101 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <fstream>
 #include "chess_rules.cpp"
 
 ChessRules chess_rules = ChessRules();
+std::ofstream log_file("uci_log.txt");
 
+void log_bitboard_as_bytes(Bitboard board)
+{
+    if (log_file.is_open()) {
+        log_file << "Bitboard in hex: 0x" 
+                 << std::hex << std::setw(16) << std::setfill('0') 
+                 << board << std::endl;
+    }
+}
+
+void log_graphic_bitboard(Bitboard board)
+{
+    if (log_file.is_open()) {
+        for (int rank = 7; rank >= 0; --rank) {
+            for (int file = 0; file < 8; ++file) {
+                if (board & (1ULL << (rank * 8 + file)))
+                    log_file << "1  ";
+                else
+                    log_file << "0  ";
+            }
+            log_file << std::endl;
+        }
+        log_file << std::endl;
+    }
+}
+
+void log_board(const std::string &message) 
+{
+    if (log_file.is_open()) {
+        log_file << "BOARD: " << message << std::endl;
+    }
+}
+
+void manage_input(const std::string &message) 
+{
+    if (log_file.is_open()) {
+        log_file << "\nREAD: " << message << std::endl;
+    }
+}
+
+void manage_output(const std::string &message) 
+{
+    if (log_file.is_open()) {
+        log_file << "SEND: " << message << std::endl;
+    }
+    std::cout << message + "\n" << std::endl;
+}
 
 void reset_board()
 {
-
+    chess_rules.reset();
 }
 
 
 void start_new_game() 
 {
-
+    chess_rules.reset();
 }
 
-
-void apply_move_startpos(const std::string &move)
-{
-
-}
-
-void apply_move_fen(const std::string &fen)
-{
-
-}
-
-std::string get_best_move()
-{
-    return chess_rules.get_best_move();
-}
 
 void handle_isready() 
-{
-    std::cout << "readyok\n";
+{   
+    manage_output("readyok");
 }
 
 void identify_engine() 
 {
-    std::cout << "id name TryChess 0.1\n";
-    std::cout << "id author Kamil Bylinka\n";
+    manage_output("id name TryChess 0.1");
+    manage_output("id author Kamil Bylinka");
 }
 
 void handle_uci() 
 {
     identify_engine();
-    std::cout << "uciok\n";
+    manage_output("uciok");
 }
 
 void handle_ucinewgame() 
 {
     start_new_game();
-    std::cout << "New game initialized\n";
+    manage_output("New game initialized");
 }
 
 void handle_position(std::stringstream &ss) 
 {
     std::string subcommand;
     ss >> subcommand;
+    log_board(chess_rules.get_char_list_board());
+    log_bitboard_as_bytes(chess_rules.get_full_board());
+    log_graphic_bitboard(chess_rules.get_full_board());
 
     if (subcommand == "startpos") {
         reset_board();
@@ -76,30 +112,38 @@ void handle_position(std::stringstream &ss)
         std::getline(ss, fen);
         chess_rules.apply_move_fen(fen);
     }
+    log_board(chess_rules.get_char_list_board());
+    log_bitboard_as_bytes(chess_rules.get_full_board());
+    log_graphic_bitboard(chess_rules.get_full_board());
 }
 
 void handle_go(std::stringstream &ss) 
 {
     std::string search_command;
+    std::string best_move;
+    
     ss >> search_command;
     // TODO
-    get_best_move();
+    best_move = chess_rules.get_best_move();
 
-    std::cout << "bestmove xXxX" << std::endl;
+    manage_output("bestmove " + best_move);
 }
 
 void handle_quit()
 {
-    std::cout << "Exiting..." << std::endl;
+    manage_output("Exiting...");
 }
 
-void UCI_loop() {
+void UCI_loop()
+{
     std::string input, command;
 
     while (true) {
         std::getline(std::cin, input); 
         std::stringstream ss(input);
         ss >> command;
+
+        manage_input(input);
 
         if (command == "uci") {
             handle_uci();
@@ -121,4 +165,11 @@ void UCI_loop() {
             break;
         }
     }
+}
+
+int main()
+{   
+    UCI_loop();
+
+    return 0;
 }
