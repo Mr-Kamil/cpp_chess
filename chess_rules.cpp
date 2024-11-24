@@ -530,6 +530,57 @@ private:
         return en_passant_move;
     }
 
+private:
+    void check_en_passant_moves()
+    {
+
+    }
+
+public:
+    bool check_is_move_valid(std::string &move)
+    {       
+        Bitboard temporary_white_pawns = this->white_pawns;
+        Bitboard temporary_white_knights = this->white_knights;
+        Bitboard temporary_white_rooks = this->white_rooks;
+        Bitboard temporary_white_bishops = this->white_bishops;
+        Bitboard temporary_white_queens = this->white_queens;
+        Bitboard temporary_white_king = this->white_king;
+
+        Bitboard temporary_black_pawns = this->black_pawns;
+        Bitboard temporary_black_knights = this->black_knights;
+        Bitboard temporary_black_rooks = this->black_rooks;
+        Bitboard temporary_black_bishops = this->black_bishops;
+        Bitboard temporary_black_queens = this->black_queens;
+        Bitboard temporary_black_king = this->black_king;
+
+        bool valid;
+        Bitboard all_moves_end_board;
+        Bitboard king_position;
+
+        king_position = this->white_to_move ? this->white_king : this->black_king;
+
+        this->apply_move_startpos(move);
+        all_moves_end_board = this->get_all_moves_end();
+        this->white_to_move = !this->white_to_move;
+
+        valid =  !(king_position & all_moves_end_board);
+
+        this->white_pawns = temporary_white_pawns;
+        this->white_knights = temporary_white_knights;
+        this->white_rooks = temporary_white_rooks;
+        this->white_bishops = temporary_white_bishops;
+        this->white_queens = temporary_white_queens;
+        this->white_king = temporary_white_king;
+
+        this->black_pawns = temporary_black_pawns;
+        this->black_knights = temporary_black_knights;
+        this->black_rooks = temporary_black_rooks;
+        this->black_bishops = temporary_black_bishops;
+        this->black_queens = temporary_black_queens;
+        this->black_king = temporary_black_king;
+
+        return valid;
+    }
 
 private:
     Bitboard generate_all_pawns_moves(Bitboard pawn_board)
@@ -576,7 +627,6 @@ public:
     {
         int source = (move[0] - 'a') + ((move[1] - '1') * 8);
         int target = (move[2] - 'a') + ((move[3] - '1') * 8);
-        // std::cout << source << ' ' << target << std::endl;
         return {source, target};
     }
 
@@ -584,12 +634,12 @@ public:
 public:
     void apply_move_startpos(const std::string &move)
     {
-        // e.g: position startpos moves [e2e4 e7e5 g1f3 b8c6]
-        // std::cout << move << std::endl;
+        // e.g: position startpos moves [e2e4 e7e5 g1f3 b8c6 a7b8q]
+
         std::pair<int, int> indicases = move_to_square_indices(move);
         int source = indicases.first;
         int target = indicases.second;
-        // std::cout << source << " - " << target << std::endl;
+
         uint64_t end_piece_mask = (1ULL << target);
         if (this->white_board & end_piece_mask) {
             if (this->white_pawns & end_piece_mask) {
@@ -622,7 +672,6 @@ public:
         }
 
         uint64_t start_piece_mask = (1ULL << source);
-        // std::cout << start_piece_mask << '=' << end_piece_mask << std::endl;
         if (this->white_board & start_piece_mask) {
             if (this->white_pawns & start_piece_mask) {
                 clear_bit(this->white_pawns, source);
@@ -755,12 +804,11 @@ private:
 
 
 public:
-    std::vector<std::string> get_all_moves()
+    std::vector<std::string> get_all_moves_str(std::vector<std::string> &all_moves_str)
     {
         int index = 0;
         Bitboard moves = 0ULL;
-        std::vector<std::string> all_moves;
-        all_moves.clear();
+        all_moves_str.clear();
 
         while (index < 64) {
             moves = 0ULL;
@@ -799,10 +847,72 @@ public:
                 }
             }
 
-            this->update_all_moves(all_moves, 1ULL << index, moves);
+            this->update_all_moves(all_moves_str, 1ULL << index, moves);
             index++;
         }
-        return all_moves;
+        return all_moves_str;
+    }
+
+public:
+    Bitboard get_all_moves_end()
+    {
+        Bitboard all_moves_end_board;
+        int index = 0;
+        Bitboard moves = 0ULL;
+
+        while (index < 64) {
+            moves = 0ULL;
+
+            if (this->white_to_move) {
+                if (this->white_board & (1ULL << index)) {
+                    if (this->white_pawns & (1ULL << index)) {
+                        moves = this->generate_all_pawns_moves(1ULL << index);
+                    } else if (this->white_rooks & (1ULL << index)) {
+                        moves = this->generate_all_rooks_moves(1ULL << index);
+                    } else if (this->white_knights & (1ULL << index)) {
+                        moves = this->generate_all_knights_moves(1ULL << index);
+                    } else if (this->white_bishops & (1ULL << index)) {
+                        moves = this->generate_all_bishops_moves(1ULL << index);
+                    } else if (this->white_queens & (1ULL << index)) {
+                        moves = this->generate_all_queens_moves(1ULL << index);
+                    } else if (this->white_king & (1ULL << index)) {
+                        moves = this->generate_all_kings_moves(1ULL << index);
+                    }
+                }
+            } else {
+                if (this->black_board & (1ULL << index)) {
+                    if (this->black_pawns & (1ULL << index)) {
+                        moves = this->generate_all_pawns_moves(1ULL << index);
+                        std::cout << "pawns" << std::endl;
+                        this->print_graphic_bitboard(moves);
+                    } else if (this->black_rooks & (1ULL << index)) {
+                        moves = this->generate_all_rooks_moves(1ULL << index);
+                        std::cout << "rooks" << std::endl;
+                        this->print_graphic_bitboard(moves);
+                    } else if (this->black_knights & (1ULL << index)) {
+                        moves = this->generate_all_knights_moves(1ULL << index);
+                        std::cout << "knights" << std::endl;
+                        this->print_graphic_bitboard(moves);
+                    } else if (this->black_bishops & (1ULL << index)) {
+                        moves = this->generate_all_bishops_moves(1ULL << index);
+                        std::cout << "bishops" << std::endl;
+                        this->print_graphic_bitboard(moves);
+                    } else if (this->black_queens & (1ULL << index)) {
+                        moves = this->generate_all_queens_moves(1ULL << index);
+                        std::cout << "queens" << std::endl;
+                        this->print_graphic_bitboard(moves);
+                    } else if (this->black_king & (1ULL << index)) {
+                        moves = this->generate_all_kings_moves(1ULL << index);
+                        std::cout << "kings" << std::endl;
+                        this->print_graphic_bitboard(moves);
+                    }
+                }
+            }
+
+            all_moves_end_board |= moves;
+            index++;
+        }
+        return all_moves_end_board;
     }
 
 
@@ -810,24 +920,21 @@ public:
     std::string get_best_move()
     {
         std::string best_move;
-        std::vector<std::string> all_moves;
+        std::vector<std::string> all_moves_str;
         
-        all_moves = this->get_all_moves();
-        // TODO
-        best_move = all_moves[0];
+        this->get_all_moves_str(all_moves_str);
+
+        for (int i = all_moves_str.size() - 1; i >= 0; --i) {
+            if (!this->check_is_move_valid(all_moves_str[i])) {
+                all_moves_str.erase(all_moves_str.begin() + i);
+            }
+        }
+    
+        best_move = all_moves_str[0];
         this->white_to_move = !this->white_to_move;
 
         return best_move;
     }
-
-
-
-public:
-    void check_is_move_valid()
-    {
-
-    }
-
 
 public:
     void make_move()
@@ -884,12 +991,12 @@ public:
 // int main() 
 // {
 //     ChessRules chess_rules = ChessRules();
-//     std::vector<std::string> all_moves;
+//     std::vector<std::string> all_moves_str;
 
-//     all_moves = chess_rules.get_all_moves();
+//     all_moves_str = chess_rules.get_all_moves_str(all_moves_str);
 
 
-//     for (const std::string& move : all_moves) {
+//     for (const std::string& move : all_moves_str) {
 //         std::cout << move << std::endl;
 //     }
 
@@ -899,10 +1006,13 @@ public:
 //     chess_rules.apply_move_startpos(startpos_1);
 //     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
 //     chess_rules.reset();
-//     std::string startpos_2 = "d2d3";
+//     std::string startpos_2 = "d1d7";
 //     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
 //     chess_rules.apply_move_startpos(startpos_2);
 //     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+
+//     std::string pos = "a7a6";
+//     chess_rules.check_is_move_valid(pos);
 
 //     return 0;
 // }
