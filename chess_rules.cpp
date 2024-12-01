@@ -338,12 +338,13 @@ private:
             piece_moves |= move;                   
             if (move_occupation == 2) break;
             if (single_move) break;
+            if (move == 0ULL) break;
         }
 
         return piece_moves;
     }
 
-private:
+public:
     Bitboard generate_all_rooks_moves(Bitboard rook_board) 
     {
         Bitboard rooks_moves = 0ULL;
@@ -356,15 +357,15 @@ private:
         return rooks_moves;
     }
 
-private:
+public:
     Bitboard generate_all_bishops_moves(Bitboard bishop_board)
     {
         Bitboard bishop_moves = 0ULL;
 
         bishop_moves |= slide_piece(bishop_board, 7, this->FILE_A | this->RANK_8);
         bishop_moves |= slide_piece(bishop_board, 9, this->FILE_H | this->RANK_8);
-        bishop_moves |= slide_piece(bishop_board, -9, this->RANK_1 | this->FILE_H);
-        bishop_moves |= slide_piece(bishop_board, -7, this->RANK_1 | this->FILE_A);
+        bishop_moves |= slide_piece(bishop_board, -7, this->RANK_1 | this->FILE_H);
+        bishop_moves |= slide_piece(bishop_board, -9, this->RANK_1 | this->FILE_A);
 
         return bishop_moves;
     }
@@ -386,7 +387,7 @@ private:
         return knights_moves;
     }
 
-private:
+public:
     Bitboard generate_all_queens_moves(Bitboard queen_board)
     {
         Bitboard queens_moves = generate_all_bishops_moves(
@@ -595,13 +596,12 @@ public:
         Bitboard all_moves_end_board;
         Bitboard king_position;
 
-        king_position = this->white_to_move ? this->white_king : this->black_king;
-
         this->apply_move_startpos(move);
         all_moves_end_board = this->get_all_moves_end();
-        this->white_to_move = !this->white_to_move;
 
-        valid =  !(king_position & all_moves_end_board);
+        this->white_to_move = !this->white_to_move;
+        king_position = this->white_to_move ? this->white_king : this->black_king;
+        valid = !(king_position & all_moves_end_board);
 
         this->white_pawns = temporary_white_pawns;
         this->white_knights = temporary_white_knights;
@@ -616,6 +616,14 @@ public:
         this->black_bishops = temporary_black_bishops;
         this->black_queens = temporary_black_queens;
         this->black_king = temporary_black_king;
+
+        this->white_board = this->white_pawns | this->white_knights | 
+                            this->white_bishops | this->white_rooks | 
+                            this->white_queens | this->white_king;
+        this->black_board = this->black_pawns | this->black_knights | 
+                            this->black_bishops | this->black_rooks | 
+                            this->black_queens | this->black_king;
+        this->full_board = this->white_board | this->black_board;
 
         return valid;
     }
@@ -1092,6 +1100,19 @@ public:
 
 //     std::string pos = "a7a6";
 //     chess_rules.check_is_move_valid(pos);
+
+//     Bitboard test1;
+//     Bitboard test_init1 = 1ULL << 36;
+//     chess_rules.print_graphic_bitboard(test_init1);
+//     test1 = chess_rules.generate_all_queens_moves(test_init1);
+//     std::cout << "===================" << std::endl;
+//     chess_rules.print_graphic_bitboard(test1);
+//     test1 = chess_rules.generate_all_rooks_moves(test_init1);
+//     std::cout << "===================" << std::endl;
+//     chess_rules.print_graphic_bitboard(test1);
+//     test1 = chess_rules.generate_all_bishops_moves(test_init1);
+//     std::cout << "===================" << std::endl;
+//     chess_rules.print_graphic_bitboard(test1);
 
 //     return 0;
 // }
