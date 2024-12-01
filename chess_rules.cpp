@@ -482,12 +482,12 @@ private:
         Bitboard square_passed = pawn_position;
 
         move_double = (shift > 0) ? (move_double << shift) : (move_double >> -shift);
-        square_passed = (shift > 0) ? (move_double << (shift - 8)) : (move_double >> (-shift + 8));
+        square_passed = (shift > 0) ? (square_passed << (8)) : (square_passed >> (8));
 
         int move_double_occupation = check_square_occupation(move_double);
         int square_passed_occupation = check_square_occupation(square_passed);
 
-        if (!(move_double_occupation | square_passed_occupation)) {
+        if (!(move_double_occupation || square_passed_occupation)) {
             pawns_moves |= move_double;                   
         }
 
