@@ -157,15 +157,15 @@ public:
     }
 
 private: 
-    void log_move()
+    void add_move_log(std::string move_log)
     {
-
+        this->move_logs.push_back(move_log);
     }
 
 private: 
     void delete_last_log_move()
     {
-
+        this->move_logs.pop_back();
     }
 
 public:
@@ -825,6 +825,90 @@ public:
                         this->black_queens | this->black_king;
     this->full_board = this->white_board | this->black_board;
     this->white_to_move = !this->white_to_move;
+
+    std::string fen = this->generate_current_fen();
+    this->add_move_log(fen);
+    }
+
+void append_piece_or_empty(std::string& position, int& empty_count, char piece) {
+    if (empty_count > 0) {
+        position += std::to_string(empty_count);
+        empty_count = 0;
+    }
+    position += piece;
+}
+
+public:
+    std::string generate_current_fen()
+    {
+        std::ostringstream fen;
+        std::string position;
+        
+        for (int rank = 7; rank >= 0; --rank) {
+            int empty_count = 0;
+            for (int file = 0; file < 8; ++file) {
+                Bitboard piece_mask = (1ULL << (rank * 8 + file));
+    
+                if (this->white_pawns & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'P');
+                } else if (this->white_knights & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'N');
+                } else if (this->white_bishops & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'B');
+                } else if (this->white_rooks & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'R');
+                } else if (this->white_queens & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'Q');
+                } else if (this->white_king & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'K');
+                } else if (this->black_pawns & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'p');
+                } else if (this->black_knights & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'n');
+                } else if (this->black_bishops & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'b');
+                } else if (this->black_rooks & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'r');
+                } else if (this->black_queens & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'q');
+                } else if (this->black_king & piece_mask) {
+                    this->append_piece_or_empty(position, empty_count, 'k');
+                } else {
+                    empty_count++;
+                }
+            }
+
+            if (empty_count > 0) {
+                position += std::to_string(empty_count);
+            }
+
+            if (rank > 0)
+                position += '/';
+        }
+
+        fen << position << " " << (this->white_to_move ? "w" : "b") << " ";
+
+        std::string castling;
+        if (this->white_king_side_castling)
+            castling += "K";
+        if (this->white_queen_side_castling)
+            castling += "Q";
+        if (this->black_king_side_castling)
+            castling += "k";
+        if (this->black_queen_side_castling)
+            castling += "q";
+        
+        fen << (!castling.empty() ? castling : "-") << " ";
+
+        if (this->en_passant_square == -1)
+            fen << "-";
+        else
+            fen << static_cast<char>('a' + this->en_passant_square % 8)
+                << static_cast<char>('1' + 7 - this->en_passant_square / 8);
+
+        fen << " " << this->halfmove_clock << " " << this->fullmove_number;
+
+        return fen.str();
     }
 
 public:
@@ -881,6 +965,8 @@ public:
 
         this->halfmove_clock = std::stoi(halfmove_str);
         this->fullmove_number = std::stoi(fullmove_str);
+
+        this->add_move_log(fen);
     }
 
 private:
@@ -1006,7 +1092,6 @@ public:
         return all_moves_end_board;
     }
 
-
 public:
     std::string get_best_move()
     {
@@ -1039,7 +1124,8 @@ public:
 
     }
 
-    int bitboard_to_index(Bitboard bb) 
+private:
+    int _bitboard_to_index(Bitboard bb) 
     {
         int index = 0;
 
@@ -1053,7 +1139,8 @@ public:
         return -1;
     }
 
-    std::string index_to_square(int index) 
+private:
+    std::string _index_to_square(int index) 
     {
         int file = index % 8;
         int rank = index / 8;
@@ -1062,13 +1149,14 @@ public:
         return std::string() + file_char + rank_char;
     }
 
+public:
     std::string bitboards_to_move(Bitboard move_begin, Bitboard move_end) 
     {
-        int begin_index = bitboard_to_index(move_begin);
-        int end_index = bitboard_to_index(move_end);
+        int begin_index = _bitboard_to_index(move_begin);
+        int end_index = _bitboard_to_index(move_end);
 
-        std::string begin_square = index_to_square(begin_index);
-        std::string end_square = index_to_square(end_index);
+        std::string begin_square = _index_to_square(begin_index);
+        std::string end_square = _index_to_square(end_index);
 
         return begin_square + end_square;
     }
@@ -1113,6 +1201,11 @@ public:
 //     test1 = chess_rules.generate_all_bishops_moves(test_init1);
 //     std::cout << "===================" << std::endl;
 //     chess_rules.print_graphic_bitboard(test1);
+
+//     std::cout << "\n===================" << std::endl;
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     std::string fen = chess_rules.generate_current_fen();
+//     std::cout << fen <<std::endl;
 
 //     return 0;
 // }
