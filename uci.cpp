@@ -141,7 +141,8 @@ void handle_go(std::stringstream &ss)
     
     ss >> search_command;
     // TODO
-    best_move = chess_rules.get_best_move();
+    // best_move = chess_rules.get_best_move();
+    best_move = chess_rules.get_best_move_nega_max(1);
     chess_rules.apply_move_startpos(best_move);
 
     manage_output("bestmove " + best_move);
