@@ -118,12 +118,12 @@ class ChessRules
 public:
     ChessRules() 
     {
-        this->reset();
+        this->set_start_positions();
         this->clear_move_logs();
     }
 
 public:
-    void reset()
+    void set_start_positions()
     {
     this->white_pawns = 0x00'00'00'00'00'00'FF'00ULL;
     this->white_knights = 0x00'00'00'00'00'00'00'42ULL;
@@ -138,6 +138,33 @@ public:
     this->black_bishops = 0x24'00'00'00'00'00'00'00ULL;
     this->black_queens = 0x08'00'00'00'00'00'00'00ULL;
     this->black_king = 0x10'00'00'00'00'00'00'00ULL;
+
+    this->update_board_variables();
+    }
+
+public:
+    void reset()
+    {
+    this->white_pawns = 0x00'00'00'00'00'00'00'00ULL;
+    this->white_knights = 0x00'00'00'00'00'00'00'00ULL;
+    this->white_rooks = 0x00'00'00'00'00'00'00'00ULL;
+    this->white_bishops = 0x00'00'00'00'00'00'00'00ULL;
+    this->white_queens = 0x00'00'00'00'00'00'00'00ULL;
+    this->white_king = 0x00'00'00'00'00'00'00'00ULL;
+
+    this->black_pawns = 0x00'00'00'00'00'00'00'00ULL;
+    this->black_knights = 0x00'00'00'00'00'00'00'00ULL;
+    this->black_rooks = 0x00'00'00'00'00'00'00'00ULL;
+    this->black_bishops = 0x00'00'00'00'00'00'00'00ULL;
+    this->black_queens = 0x00'00'00'00'00'00'00'00ULL;
+    this->black_king = 0x00'00'00'00'00'00'00'00ULL;
+
+    this->update_board_variables();
+    }
+
+public: 
+    void update_board_variables()
+    {
 
     this->white_board = white_pawns | white_knights | white_rooks |
                         white_bishops | white_queens | white_king;
@@ -636,6 +663,8 @@ public:
                             this->black_queens | this->black_king;
         this->full_board = this->white_board | this->black_board;
 
+        this->move_logs.pop_back();
+
         return valid;
     }
 
@@ -926,6 +955,7 @@ public:
     void apply_move_fen(const std::string &fen)
     {
         // e.g: position fen [rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1]
+        this->reset();
 
         std::istringstream ss(fen);
         std::string position, active_color, castling, en_passant, halfmove_str, fullmove_str;
@@ -940,7 +970,7 @@ public:
             } else if (isdigit(c)) {
                 file += c - '0';
             } else {
-                Bitboard piece_mask = (1ULL << (56 - (rank * 8 + file)));
+                Bitboard piece_mask = (1ULL << (63 - (rank * 8 + (7 - file))));
                 switch (c) {
                     case 'P': this->white_pawns |= piece_mask; break;
                     case 'N': this->white_knights |= piece_mask; break;
@@ -1129,21 +1159,26 @@ public:
 public:
     void undo_move()
     {
-    this->apply_move_fen(this->move_logs[-2]);
-    this->delete_last_log_move();
-    this->delete_last_log_move();
+        if (this->move_logs.size() > 1) {
+            this->delete_last_log_move();
+            this->apply_move_fen(this->move_logs.back());
+            this->delete_last_log_move();
+        } else {
+            this->set_start_positions();
+            this->clear_move_logs();
+        }
     }
 
 private:
-    int _bitboard_to_index(Bitboard bb) 
+    int _bitboard_to_index(Bitboard bitboard) 
     {
         int index = 0;
 
-        while (bb != 0) {
-            if (bb & 1) {
+        while (bitboard != 0) {
+            if (bitboard & 1) {
                 return index;
             }
-            bb >>= 1;
+            bitboard >>= 1;
             index++;
         }
         return -1;
@@ -1175,18 +1210,18 @@ public:
     std::string get_best_move_nega_max(int depth)
     {
         this->next_move = "";
-        this->find_nega_max_move_alpha_beta(depth, depth);
+        int turn_multiplier = this->white_to_move ? 1 : -1;
+        int alpha = -this->checkmate;
+        int beta = this->checkmate;
+        this->find_nega_max_move_alpha_beta(depth, depth, turn_multiplier, alpha, beta);
 
         return this->next_move;
     }
 
 public:
-    int find_nega_max_move_alpha_beta(int depth, int max_depth) 
+    int find_nega_max_move_alpha_beta(int depth, int max_depth, 
+                                      int turn_multiplier, int alpha, int beta) 
     {
-        int turn_multiplier = this->white_to_move ? 1 : -1;
-        int alpha = -this->checkmate;
-        int beta = this->checkmate;
-
         if (depth == 0) {
             return turn_multiplier * this->score_material();
         }
@@ -1194,9 +1229,13 @@ public:
         int max_score = -this->checkmate;
         std::vector<std::string> valid_moves = this->get_all_valid_moves_str();
 
-        for (const auto& move : valid_moves) {
+        for (int n = 0; n < valid_moves.size(); n++) {
+            std::string move = valid_moves[n];
+
             this->apply_move_startpos(move);
-            int score = -find_nega_max_move_alpha_beta(depth - 1, max_depth);
+            int score = -find_nega_max_move_alpha_beta(depth - 1, max_depth, 
+                                                        -turn_multiplier, -beta, 
+                                                        -alpha);
             this->undo_move();
 
             if (score >= max_score) {
@@ -1211,7 +1250,6 @@ public:
                 break;
             }
         }
-
         return max_score;
     }
 
@@ -1236,59 +1274,67 @@ public:
 
         return score;
     }
-
 };
 
+// int main() 
+// {
+//     ChessRules chess_rules = ChessRules();
+//     std::vector<std::string> all_moves_str;
 
-int main() 
-{
-    ChessRules chess_rules = ChessRules();
-    std::vector<std::string> all_moves_str;
-
-    all_moves_str = chess_rules.get_all_moves_str(all_moves_str);
-
-
-    for (const std::string& move : all_moves_str) {
-        std::cout << move << std::endl;
-    }
+//     all_moves_str = chess_rules.get_all_moves_str(all_moves_str);
 
 
-    std::string startpos_1 = "a7a6";
-    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
-    chess_rules.apply_move_startpos(startpos_1);
-    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
-    chess_rules.reset();
-    std::string startpos_2 = "d1d7";
-    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
-    chess_rules.apply_move_startpos(startpos_2);
-    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     for (const std::string& move : all_moves_str) {
+//         std::cout << move << std::endl;
+//     }
 
-    std::string pos = "a7a6";
-    chess_rules.check_is_move_str_valid(pos);
 
-    Bitboard test1;
-    Bitboard test_init1 = 1ULL << 36;
-    chess_rules.print_graphic_bitboard(test_init1);
-    test1 = chess_rules.generate_all_queens_moves(test_init1);
-    std::cout << "===================" << std::endl;
-    chess_rules.print_graphic_bitboard(test1);
-    test1 = chess_rules.generate_all_rooks_moves(test_init1);
-    std::cout << "===================" << std::endl;
-    chess_rules.print_graphic_bitboard(test1);
-    test1 = chess_rules.generate_all_bishops_moves(test_init1);
-    std::cout << "===================" << std::endl;
-    chess_rules.print_graphic_bitboard(test1);
+//     std::string startpos_1 = "a7a6";
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     chess_rules.apply_move_startpos(startpos_1);
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     chess_rules.set_start_positions();
+//     std::string startpos_2 = "d1d7";
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     chess_rules.apply_move_startpos(startpos_2);
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
 
-    std::cout << "\n===================" << std::endl;
-    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
-    std::string fen = chess_rules.generate_current_fen();
-    std::cout << fen <<std::endl;
+//     std::string pos = "a7a6";
+//     chess_rules.check_is_move_str_valid(pos);
 
-    std::cout << "\n\n\n\n\n===================\nNEGA_MAX\n" << std::endl;
-    chess_rules.reset();
-    std::string move = chess_rules.get_best_move_nega_max(1);
-    chess_rules.apply_move_startpos(move);
-    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     Bitboard test1;
+//     Bitboard test_init1 = 1ULL << 36;
+//     chess_rules.print_graphic_bitboard(test_init1);
+//     test1 = chess_rules.generate_all_queens_moves(test_init1);
+//     std::cout << "===================" << std::endl;
+//     chess_rules.print_graphic_bitboard(test1);
+//     test1 = chess_rules.generate_all_rooks_moves(test_init1);
+//     std::cout << "===================" << std::endl;
+//     chess_rules.print_graphic_bitboard(test1);
+//     test1 = chess_rules.generate_all_bishops_moves(test_init1);
+//     std::cout << "===================" << std::endl;
+//     chess_rules.print_graphic_bitboard(test1);
 
-    return 0;
-}
+//     std::cout << "\n===================" << std::endl;
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     std::string fen = chess_rules.generate_current_fen();
+//     std::cout << fen <<std::endl;
+
+//     std::cout << "\n\n\n\n\n===================\nNEGA_MAX\n" << std::endl;
+//     chess_rules.set_start_positions();
+//     chess_rules.clear_move_logs();
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     std::string move = chess_rules.get_best_move_nega_max(2);
+//     std::cout << "Best move: " << move << std::endl;
+//     chess_rules.apply_move_startpos(move);
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     chess_rules.apply_move_fen("rnbqkbnr/pppQpppR/8/8/8/N7/PPPPPPPP/R1BQKBNR b KQkq - 0 0");
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     chess_rules.set_start_positions();
+//     chess_rules.apply_move_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+
+//     return 0;
+// }
