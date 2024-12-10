@@ -71,13 +71,13 @@ void manage_output(const std::string &message)
 
 void reset_board()
 {
-    chess_rules.reset();
+    chess_rules.set_start_positions();
 }
 
 
 void start_new_game() 
 {
-    chess_rules.reset();
+    chess_rules.set_start_positions();
 }
 
 
