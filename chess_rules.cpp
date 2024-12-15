@@ -1354,54 +1354,54 @@ public:
 //     return 0;
 // }
 
-int main() 
-{
-    ChessRules chess_rules = ChessRules();
+// int main() 
+// {
+//     ChessRules chess_rules = ChessRules();
 
-    std::cout << "\n\n\n===================\nNEGA_MAX\n" << std::endl;
-    chess_rules.set_start_positions();
-    chess_rules.clear_move_logs();
+//     std::cout << "\n\n\n===================\nNEGA_MAX\n" << std::endl;
+//     chess_rules.set_start_positions();
+//     chess_rules.clear_move_logs();
 
-    // std::string moves_str = "e2e4 g8h6 d1h5 h8g8 h5h6 g8h8 h6g7 h8g8 g7f7";
-    std::string moves_str = "e2e3 g8h6 d1h5 h8g8 h5h6";
-    std::istringstream ss(moves_str);
-    std::string move1;
-    while (ss >> move1) {
-        chess_rules.apply_move_startpos(move1);
-    }
+//     // std::string moves_str = "e2e4 g8h6 d1h5 h8g8 h5h6 g8h8 h6g7 h8g8 g7f7";
+//     std::string moves_str = "e2e3 g8h6 d1h5 h8g8 h5h6";
+//     std::istringstream ss(moves_str);
+//     std::string move1;
+//     while (ss >> move1) {
+//         chess_rules.apply_move_startpos(move1);
+//     }
 
-    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
 
-    std::cout << "---" << chess_rules.white_to_move << "\n";
-    std::string move = chess_rules.get_best_move_nega_max(1);
-    std::cout << "Best move: " << move << "\n" << std::endl;
-    chess_rules.apply_move_startpos(move);
-    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
-
-
-    std::cout << "\n\n\n===================\nSTARTPOS\n" << std::endl;
-
-    chess_rules.set_start_positions();
-    chess_rules.clear_move_logs();
-
-    while (ss >> move1) {
-        chess_rules.apply_move_startpos(move1);
-    }
-
-    std::string move2 = "b8c6";
-    std::cout << "Before: " << move2 << "\n";
-    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
-    std::cout << "--- white: " << chess_rules.white_to_move << "\n";
-    chess_rules.apply_move_startpos(move2);
-    std::cout << "After: " << move2 << "\n";
-    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
-    std::cout << "Move: " << move2 << "\n";
+//     std::cout << "---" << chess_rules.white_to_move << "\n";
+//     std::string move = chess_rules.get_best_move_nega_max(1);
+//     std::cout << "Best move: " << move << "\n" << std::endl;
+//     chess_rules.apply_move_startpos(move);
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
 
 
-    // chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
-    // chess_rules.apply_move_fen("rnbqkbr1/pppppppp/7Q/8/8/4P3/PPPP1PPP/RNB1KBNR b KQkq - 0 0")
-    // chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     std::cout << "\n\n\n===================\nSTARTPOS\n" << std::endl;
+
+//     chess_rules.set_start_positions();
+//     chess_rules.clear_move_logs();
+
+//     while (ss >> move1) {
+//         chess_rules.apply_move_startpos(move1);
+//     }
+
+//     std::string move2 = "b8c6";
+//     std::cout << "Before: " << move2 << "\n";
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     std::cout << "--- white: " << chess_rules.white_to_move << "\n";
+//     chess_rules.apply_move_startpos(move2);
+//     std::cout << "After: " << move2 << "\n";
+//     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     std::cout << "Move: " << move2 << "\n";
 
 
-    return 0;
-}
+//     // chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+//     // chess_rules.apply_move_fen("rnbqkbr1/pppppppp/7Q/8/8/4P3/PPPP1PPP/RNB1KBNR b KQkq - 0 0")
+//     // chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+
+
+//     return 0;
+// }

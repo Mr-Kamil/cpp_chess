@@ -43,7 +43,6 @@ void log_graphic_chessboard(const std::string &board_str)
             }
             log_file << "\n";
         }
-        log_file << "\n";
     }
 }
 
@@ -100,9 +99,6 @@ void handle_uci()
 
 void log_positions()
 {
-    log_board(chess_rules.get_char_list_board());
-    log_bitboard_as_bytes(chess_rules.get_full_board());
-    log_graphic_bitboard(chess_rules.get_full_board());
     log_graphic_chessboard(chess_rules.get_char_list_board());
 }
 
@@ -123,7 +119,6 @@ void handle_position(std::stringstream &ss)
         if (ss >> moves && moves == "moves") {
             std::string move;
             while (ss >> move) {
-                log_file << move << std::endl;
                 chess_rules.apply_move_startpos(move);
             }
         }
@@ -141,8 +136,7 @@ void handle_go(std::stringstream &ss)
     
     ss >> search_command;
     // TODO
-    // best_move = chess_rules.get_best_move();
-    best_move = chess_rules.get_best_move_nega_max(1);
+    best_move = chess_rules.get_best_move_nega_max(3);
     chess_rules.apply_move_startpos(best_move);
 
     manage_output("bestmove " + best_move);
