@@ -4,6 +4,14 @@
 #include <sstream>
 #include <vector>
 
+// void const print_moves_string_(std::vector<std::string> &moves)
+// {
+//     std::cout << "Print moves...\n";
+//     for (const std::string &move : moves) {
+//         std::cout << move << std::endl;
+//     }
+// }
+
 typedef uint64_t Bitboard;
 // std::string bitboard_representation = R"(
 // Bitboard
@@ -96,6 +104,7 @@ class ChessRules
     bool black_king_side_castling;
     bool black_queen_side_castling;
 
+public:
     bool white_to_move;
     int en_passant_square; // -1 means no en passant
 
@@ -340,7 +349,6 @@ public:
             }
             std::cout << "\n";
         }
-        std::cout << "\n";
     }
 
 private:
@@ -488,6 +496,10 @@ private:
         king_moves |= slide_piece(king_board, 1, this->FILE_H, true);
         king_moves |= slide_piece(king_board, -8, this->RANK_1, true);
         king_moves |= slide_piece(king_board, 8, this->RANK_8, true);
+        king_moves |= slide_piece(king_board, 7, this->FILE_A | this->RANK_8, true);
+        king_moves |= slide_piece(king_board, 9, this->FILE_H | this->RANK_8, true);
+        king_moves |= slide_piece(king_board, -7, this->RANK_1 | this->FILE_H, true);
+        king_moves |= slide_piece(king_board, -9, this->RANK_1 | this->FILE_A, true);
 
         king_moves |= generate_queen_side_castling_move(king_board);
         king_moves |= generate_king_side_castling_move(king_board);
@@ -717,8 +729,7 @@ public:
     void apply_move_startpos(const std::string &move)
     {
         // e.g: position startpos moves [e2e4 e7e5 g1f3 b8c6 a7b8q]
-
-        std::pair<int, int> indicases = move_to_square_indices(move);
+        std::pair<int, int> indicases = this->move_to_square_indices(move);
         int source = indicases.first;
         int target = indicases.second;
 
@@ -857,26 +868,27 @@ public:
             }
         }
 
-    this->white_board = this->white_pawns | this->white_knights | 
-                        this->white_bishops | this->white_rooks | 
-                        this->white_queens | this->white_king;
-    this->black_board = this->black_pawns | this->black_knights | 
-                        this->black_bishops | this->black_rooks | 
-                        this->black_queens | this->black_king;
-    this->full_board = this->white_board | this->black_board;
-    this->white_to_move = !this->white_to_move;
+        this->white_board = this->white_pawns | this->white_knights | 
+                            this->white_bishops | this->white_rooks | 
+                            this->white_queens | this->white_king;
+        this->black_board = this->black_pawns | this->black_knights | 
+                            this->black_bishops | this->black_rooks | 
+                            this->black_queens | this->black_king;
+        this->full_board = this->white_board | this->black_board;
+        this->white_to_move = !(this->white_to_move);
 
-    std::string fen = this->generate_current_fen();
-    this->add_move_log(fen);
+        std::string fen = this->generate_current_fen();
+        this->add_move_log(fen);
     }
 
-void append_piece_or_empty(std::string& position, int& empty_count, char piece) {
-    if (empty_count > 0) {
-        position += std::to_string(empty_count);
-        empty_count = 0;
+void append_piece_or_empty(std::string &position, int &empty_count, char piece) 
+    {
+        if (empty_count > 0) {
+            position += std::to_string(empty_count);
+            empty_count = 0;
+        }
+        position += piece;
     }
-    position += piece;
-}
 
 public:
     std::string generate_current_fen()
@@ -1007,6 +1019,12 @@ public:
         this->halfmove_clock = std::stoi(halfmove_str);
         this->fullmove_number = std::stoi(fullmove_str);
 
+        this->white_board = white_pawns | white_knights | white_rooks |
+                            white_bishops | white_queens | white_king;
+        this->black_board = black_pawns | black_knights | black_rooks |
+                            black_bishops | black_queens | black_king;
+        this->full_board = white_board | black_board;
+
         this->add_move_log(fen);
     }
 
@@ -1132,20 +1150,6 @@ public:
     }
 
 public:
-    std::string get_best_move()
-    {
-        std::string best_move;
-        std::vector<std::string> all_moves_str;
-        
-        this->get_all_moves_str(all_moves_str);
-        this->validate_moves_str(all_moves_str);
-    
-        best_move = all_moves_str[0];
-
-        return best_move;
-    }
-
-public:
     std::vector<std::string> get_all_valid_moves_str()
     {
         std::vector<std::string> all_moves_str;
@@ -1219,8 +1223,9 @@ public:
     }
 
 public:
-    int find_nega_max_move_alpha_beta(int depth, int max_depth, 
-                                      int turn_multiplier, int alpha, int beta) 
+    int find_nega_max_move_alpha_beta(
+        int depth, int max_depth, int turn_multiplier, int alpha, int beta
+        ) 
     {
         if (depth == 0) {
             return turn_multiplier * this->score_material();
@@ -1233,9 +1238,9 @@ public:
             std::string move = valid_moves[n];
 
             this->apply_move_startpos(move);
-            int score = -find_nega_max_move_alpha_beta(depth - 1, max_depth, 
-                                                        -turn_multiplier, -beta, 
-                                                        -alpha);
+            int score = -find_nega_max_move_alpha_beta(
+                depth - 1, max_depth, -turn_multiplier, -beta, -alpha
+                );
             this->undo_move();
 
             if (score >= max_score) {
@@ -1254,23 +1259,33 @@ public:
     }
 
 public:
-    int score_material() 
+    int score_material()
     {
         int score = 0;
 
-        score += this->PAWN_VALUE * __builtin_popcountll(this->white_pawns);
-        score += this->KNIGHT_VALUE * __builtin_popcountll(this->white_knights);
-        score += this->BISHOP_VALUE * __builtin_popcountll(this->white_bishops);
-        score += this->ROOK_VALUE * __builtin_popcountll(this->white_rooks);
-        score += this->QUEEN_VALUE * __builtin_popcountll(this->white_queens);
-        score += this->KING_VALUE * __builtin_popcountll(this->white_king);
+        auto count_bits = [](Bitboard bitboard) -> int 
+        {
+            int count = 0;
+            while (bitboard) {
+                count += bitboard & 1;
+                bitboard >>= 1;
+            }
+            return count;
+        };
 
-        score -= this->PAWN_VALUE * __builtin_popcountll(this->black_pawns);
-        score -= this->KNIGHT_VALUE * __builtin_popcountll(this->black_knights);
-        score -= this->BISHOP_VALUE * __builtin_popcountll(this->black_bishops);
-        score -= this->ROOK_VALUE * __builtin_popcountll(this->black_rooks);
-        score -= this->QUEEN_VALUE * __builtin_popcountll(this->black_queens);
-        score -= this->KING_VALUE * __builtin_popcountll(this->black_king);
+        score += this->PAWN_VALUE * count_bits(this->white_pawns);
+        score += this->KNIGHT_VALUE * count_bits(this->white_knights);
+        score += this->BISHOP_VALUE * count_bits(this->white_bishops);
+        score += this->ROOK_VALUE * count_bits(this->white_rooks);
+        score += this->QUEEN_VALUE * count_bits(this->white_queens);
+        score += this->KING_VALUE * count_bits(this->white_king);
+
+        score -= this->PAWN_VALUE * count_bits(this->black_pawns);
+        score -= this->KNIGHT_VALUE * count_bits(this->black_knights);
+        score -= this->BISHOP_VALUE * count_bits(this->black_bishops);
+        score -= this->ROOK_VALUE * count_bits(this->black_rooks);
+        score -= this->QUEEN_VALUE * count_bits(this->black_queens);
+        score -= this->KING_VALUE * count_bits(this->black_king);
 
         return score;
     }
@@ -1324,7 +1339,7 @@ public:
 //     chess_rules.set_start_positions();
 //     chess_rules.clear_move_logs();
 //     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
-//     std::string move = chess_rules.get_best_move_nega_max(2);
+//     std::string move = chess_rules.get_best_move_nega_max(1);
 //     std::cout << "Best move: " << move << std::endl;
 //     chess_rules.apply_move_startpos(move);
 //     chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
@@ -1338,3 +1353,55 @@ public:
 
 //     return 0;
 // }
+
+int main() 
+{
+    ChessRules chess_rules = ChessRules();
+
+    std::cout << "\n\n\n===================\nNEGA_MAX\n" << std::endl;
+    chess_rules.set_start_positions();
+    chess_rules.clear_move_logs();
+
+    // std::string moves_str = "e2e4 g8h6 d1h5 h8g8 h5h6 g8h8 h6g7 h8g8 g7f7";
+    std::string moves_str = "e2e3 g8h6 d1h5 h8g8 h5h6";
+    std::istringstream ss(moves_str);
+    std::string move1;
+    while (ss >> move1) {
+        chess_rules.apply_move_startpos(move1);
+    }
+
+    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+
+    std::cout << "---" << chess_rules.white_to_move << "\n";
+    std::string move = chess_rules.get_best_move_nega_max(1);
+    std::cout << "Best move: " << move << "\n" << std::endl;
+    chess_rules.apply_move_startpos(move);
+    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+
+
+    std::cout << "\n\n\n===================\nSTARTPOS\n" << std::endl;
+
+    chess_rules.set_start_positions();
+    chess_rules.clear_move_logs();
+
+    while (ss >> move1) {
+        chess_rules.apply_move_startpos(move1);
+    }
+
+    std::string move2 = "b8c6";
+    std::cout << "Before: " << move2 << "\n";
+    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+    std::cout << "--- white: " << chess_rules.white_to_move << "\n";
+    chess_rules.apply_move_startpos(move2);
+    std::cout << "After: " << move2 << "\n";
+    chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+    std::cout << "Move: " << move2 << "\n";
+
+
+    // chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+    // chess_rules.apply_move_fen("rnbqkbr1/pppppppp/7Q/8/8/4P3/PPPP1PPP/RNB1KBNR b KQkq - 0 0")
+    // chess_rules.print_graphic_chessboard(chess_rules.get_char_list_board());
+
+
+    return 0;
+}
