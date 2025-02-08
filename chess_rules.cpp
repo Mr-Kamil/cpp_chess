@@ -738,6 +738,8 @@ public:
             promotion_piece = move[4];
         }
 
+        // TODO: castlings
+
         // clear target square
         uint64_t end_piece_mask = (1ULL << target);
         if (this->white_board & end_piece_mask) {
@@ -1003,10 +1005,26 @@ public:
 
         this->white_to_move = (active_color == "w");
 
-        if (castling.find('K') != std::string::npos) this->white_king_side_castling = true; 
-        if (castling.find('Q') != std::string::npos) this->white_queen_side_castling = true; 
-        if (castling.find('k') != std::string::npos) this->black_king_side_castling = true; 
-        if (castling.find('q') != std::string::npos) this->black_queen_side_castling = true; 
+        if (castling.find('K') != std::string::npos) {
+            this->white_king_side_castling = true; 
+        } else {
+            this->white_king_side_castling = false;
+            }
+        if (castling.find('Q') != std::string::npos) {
+            this->white_queen_side_castling = true; 
+        } else {
+            this->white_queen_side_castling = false;
+            }
+        if (castling.find('k') != std::string::npos) {
+            this->black_king_side_castling = true; 
+        } else {
+            this->black_king_side_castling = false;
+            }
+        if (castling.find('q') != std::string::npos) {
+            this->black_queen_side_castling = true; 
+        } else {
+            this->black_queen_side_castling = false;    
+            }
 
         if (en_passant == "-") {
             this->en_passant_square = -1;
