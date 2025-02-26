@@ -1,12 +1,4 @@
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <sstream>
-#include <fstream>
-#include "chess_rules.cpp"
-
-ChessRules chess_rules = ChessRules();
-std::ofstream log_file("uci_log.txt");
+#include "uci.h"
 
 void log_bitboard_as_bytes(Bitboard board)
 {
