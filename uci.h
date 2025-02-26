@@ -1,9 +1,12 @@
+#ifndef UCI_H
+#define UCI_H
+
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <sstream>
 #include <fstream>
-#include "chess_rules.cpp"
+#include "chess_rules.h"
 
 extern ChessRules chess_rules;
 extern std::ofstream log_file;
@@ -41,3 +44,5 @@ void handle_go(std::stringstream &ss);
 void handle_quit();
 
 void UCI_loop();
+
+#endif // UCI_H
