@@ -5,8 +5,8 @@
 #include <fstream>
 #include "chess_rules.cpp"
 
-ChessRules chess_rules = ChessRules();
-std::ofstream log_file("uci_log.txt");
+extern ChessRules chess_rules;
+extern std::ofstream log_file;
 
 void log_bitboard_as_bytes(Bitboard board);
 

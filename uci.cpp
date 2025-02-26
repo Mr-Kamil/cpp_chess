@@ -1,5 +1,8 @@
 #include "uci.h"
 
+ChessRules chess_rules = ChessRules();
+std::ofstream log_file("uci_log.txt");
+
 void log_bitboard_as_bytes(Bitboard board)
 {
     if (log_file.is_open()) {
