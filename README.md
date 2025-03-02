@@ -5,9 +5,9 @@ cpp_chess is a chess engine built from scratch in C++, designed to be compatible
 **Status:** Work in progress...
 
 ---
-This chess_engine was tested with the Arena chess GUI - you can download it from: http://www.playwitharena.de/
- - Download the arena gui
- - Install the arena gui
+This chess_engine was tested with the Arena Chess GUI - you can download it from: http://www.playwitharena.de/ or https://www.fileeagle.com/software/1598/Arena
+ - Download the Arena Chess GUI
+ - Install the Arena Chess GUI
  - Clone the cpp_chess repository:
    ```batch
    git clone https://github.com/your-repo/cpp_chess.git
