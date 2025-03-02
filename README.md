@@ -31,7 +31,7 @@ This chess_engine was tested with the Arena chess GUI - you can download it from
 - Update logging mechanics
 
 ---
-## Features (Planned & Implemented)
+## Features:
 -  **UCI Protocol Support** – Communicates with GUI interfaces like ChessBase, Arena, or CuteChess. Implemented main commands.
 -  **Custom Chess Rules Engine** – Implements move validation, board representation, and game state management.
 -  **Nega Max Algorithm** – A custom-built AI designed for efficient position evaluation and decision-making.
