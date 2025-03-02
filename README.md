@@ -2,19 +2,19 @@
 
 cpp_chess is a chess engine built from scratch in C++, designed to be compatible with the UCI (Universal Chess Interface) protocol. This project implements the NegaMax algorithm and utilizes bitboards for board representation, similar to professional chess engines.
 
-**Status:** Work in progress 🛠️
+**Status:** Work in progress...
 
 ---
 This chess_engine was tested with the Arena chess GUI - you can download it from: http://www.playwitharena.de/
  - Download the arena gui
  - Install the arena gui
  - Clone the cpp_chess repository:
- - ```batch
+   ```batch
    git clone https://github.com/your-repo/cpp_chess.git
    cd cpp_chess
    ```
  - Compile the project:
- - ```batch
+   ```batch
    g++ uci.cpp chess_rules.cpp -o cpp_chess
    ```
  - Open the Arena GUI and install a new engine.
