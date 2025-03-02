@@ -35,47 +35,6 @@
 // )";
 
 
-// Bitboard ChessRules::white_pawns;
-// Bitboard ChessRules::white_knights;
-// Bitboard ChessRules::white_rooks;
-// Bitboard ChessRules::white_bishops;
-// Bitboard ChessRules::white_queens;
-// Bitboard ChessRules::white_king;
-
-// Bitboard ChessRules::black_pawns;
-// Bitboard ChessRules::black_knights;
-// Bitboard ChessRules::black_rooks;
-// Bitboard ChessRules::black_bishops;
-// Bitboard ChessRules::black_queens;
-// Bitboard ChessRules::black_king;
-
-// Bitboard ChessRules::white_board;
-// Bitboard ChessRules::black_board;
-// Bitboard ChessRules::full_board;
-
-// Bitboard ChessRules::last_move_begin;
-// Bitboard ChessRules::last_move_end;
-
-
-// bool white_king_side_castling;
-// bool white_queen_side_castling;
-
-// bool black_king_side_castling;
-// bool black_queen_side_castling;
-
-
-// bool white_to_move;
-// int en_passant_square; // -1 means no en passant
-
-// int halfmove_clock;
-// int fullmove_number;
-
-// std::vector<std::string> ChessRules::move_logs = {};
-
-
-
-// std::string next_move;
-
 ChessRules::ChessRules()
   : FILE_A(0x0101010101010101ULL),
     FILE_B(0x0202020202020202ULL),
