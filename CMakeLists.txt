@@ -4,4 +4,4 @@ project(cpp_chess)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_executable(cpp_chess uci.cpp chess_rules.cpp)
+add_executable(cpp_chess uci.cpp chess_rules.cpp chess_algorithm.cpp)
