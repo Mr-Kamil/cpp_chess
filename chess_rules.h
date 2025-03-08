@@ -98,147 +98,103 @@ public:
 
     std::string next_move;
 
-public:
     ChessRules();
 
-public:
     void set_start_positions();
 
-public:
     void reset();
 
-public: 
     void update_board_variables();
 
-public:
     void clear_move_logs();
 
-private: 
     void add_move_log(std::string move_log);
 
-private: 
     void delete_last_log_move();
 
-public:
-    Bitboard get_full_board();
-
-public:
-    char *get_char_list_board();
-
-public:
-    void get_bitboards_from_char_list(const char* char_board) ;
-
-public:
-    void print_bitboard_as_bytes(Bitboard board);
-
-public:
-    void print_graphic_bitboard(Bitboard board);
-
-public: 
-    void print_graphic_chessboard(const std::string &board_str);
-
-private:
     int check_square_occupation(Bitboard move);
 
-private:
     Bitboard slide_piece(
         Bitboard piece_position, int shift, Bitboard boundary_mask, 
         bool single_move=false
         );
 
-public:
-    Bitboard generate_all_rooks_moves(Bitboard rook_board);
-
-public:
-    Bitboard generate_all_bishops_moves(Bitboard bishop_board);
-
-private:
     Bitboard generate_all_knights_moves(Bitboard knights_board);
-
-public:
-    Bitboard generate_all_queens_moves(Bitboard queen_board);
-
-private:
+    
     Bitboard generate_queen_side_castling_move(Bitboard king_board);
 
-private:
     Bitboard generate_king_side_castling_move(Bitboard king_board);
 
-private:
     Bitboard generate_all_kings_moves(Bitboard king_board);
 
-private:
     Bitboard slide_pawn(Bitboard pawn_position, int shift, Bitboard boundary_mask) ;
 
-private:
     Bitboard slide_double_pawn(Bitboard pawn_position, int shift);
 
-private:
     Bitboard capture_pawn(Bitboard pawn_position, int shift, Bitboard boundary_mask);
 
-private:
     Bitboard generate_en_passant_move(Bitboard pawn_position);
 
-private:
     Bitboard en_passant_move_old(Bitboard pawn_position);
 
-private:
     void check_en_passant_moves();
 
-public:
-    bool check_is_move_str_valid(std::string &move);
-
-private:
     Bitboard generate_all_pawns_moves(Bitboard pawn_board);
 
-private:
     void clear_bit(uint64_t &bitboard, int square);
 
-private:
     void set_bit(uint64_t &bitboard, int square);
 
-public:
-    std::pair<int, int> move_to_square_indices(const std::string &move);
+    void update_all_moves_str(
+        std::vector<std::string> &all_moves_str, 
+        Bitboard start_square, Bitboard moves_end_squares
+        );
 
-public:
-    void apply_move_startpos(const std::string &move);
-
-void append_piece_or_empty(std::string &position, int &empty_count, char piece);
-
-public:
-    std::string generate_current_fen();
-
-public:
-    void apply_move_fen(const std::string &fen);
-
-private:
-    void update_all_moves_str(std::vector<std::string> &all_moves_str, 
-    Bitboard start_square, Bitboard moves_end_squares);
-
-public:
-    std::vector<std::string> get_all_moves_str(std::vector<std::string> &all_moves_str);
-
-public:
-    Bitboard get_all_moves_end();
-
-public:
-    void validate_moves_str(std::vector<std::string> &all_moves_str);
-
-public:
-    std::vector<std::string> get_all_valid_moves_str();
-
-public:
-    void undo_move();
-
-private:
     int _bitboard_to_index(Bitboard bitboard);
 
-private:
     std::string _index_to_square(int index);
 
-public:
-    std::string bitboards_to_move(Bitboard move_begin, Bitboard move_end);
+    Bitboard get_full_board();
 
+    char *get_char_list_board();
+
+    void get_bitboards_from_char_list(const char* char_board) ;
+
+    void print_bitboard_as_bytes(Bitboard board);
+
+    void print_graphic_bitboard(Bitboard board);
+
+    void print_graphic_chessboard(const std::string &board_str);
+
+    Bitboard generate_all_rooks_moves(Bitboard rook_board);
+
+    Bitboard generate_all_bishops_moves(Bitboard bishop_board);
+
+    Bitboard generate_all_queens_moves(Bitboard queen_board);
+
+    bool check_is_move_str_valid(std::string &move);
+
+    std::pair<int, int> move_to_square_indices(const std::string &move);
+
+    void apply_move_startpos(const std::string &move);
+
+    void append_piece_or_empty(std::string &position, int &empty_count, char piece);
+
+    std::string generate_current_fen();
+
+    void apply_move_fen(const std::string &fen);
+
+    std::vector<std::string> get_all_moves_str(std::vector<std::string> &all_moves_str);
+
+    Bitboard get_all_moves_end();
+
+    void validate_moves_str(std::vector<std::string> &all_moves_str);
+
+    std::vector<std::string> get_all_valid_moves_str();
+
+    void undo_move();
+
+    std::string bitboards_to_move(Bitboard move_begin, Bitboard move_end);
 };
 
 #endif // CHESS_RULES_H
