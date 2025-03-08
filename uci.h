@@ -4,17 +4,10 @@
 #include <fstream>
 #include "chess_rules.h"
 #include "chess_algorithm.h"
+#include "help_functions.h"
 
 extern ChessRules chess_rules;
 extern std::ofstream log_file;
-
-void log_bitboard_as_bytes(Bitboard board);
-
-void log_graphic_bitboard(Bitboard board);
-
-void log_graphic_chessboard(const std::string &board_str);
-
-void log_board(const std::string &message);
 
 void manage_input(const std::string &message);
 

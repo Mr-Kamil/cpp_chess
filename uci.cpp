@@ -4,51 +4,6 @@ ChessRules chess_rules = ChessRules();
 ChessAlgorithm chess_algorithm = ChessAlgorithm();
 std::ofstream log_file("uci_log.txt");
 
-void log_bitboard_as_bytes(Bitboard board)
-{
-    if (log_file.is_open()) {
-        log_file << "Bitboard in hex: 0x" 
-                 << std::hex << std::setw(16) << std::setfill('0') 
-                 << board << std::endl;
-    }
-}
-
-void log_graphic_bitboard(Bitboard board)
-{
-    if (log_file.is_open()) {
-        for (int rank = 7; rank >= 0; --rank) {
-            for (int file = 0; file < 8; ++file) {
-                if (board & (1ULL << (rank * 8 + file)))
-                    log_file << "1  ";
-                else
-                    log_file << "0  ";
-            }
-            log_file << std::endl;
-        }
-        log_file << std::endl;
-    }
-}
-
-void log_graphic_chessboard(const std::string &board_str) 
-{
-    if (log_file.is_open()) {
-        for (int rank = 7; rank >= 0; --rank) {
-            for (int file = 0; file < 8; ++file) {
-                int square = rank * 8 + file; 
-                log_file << board_str[square] << "  ";
-            }
-            log_file << "\n";
-        }
-    }
-}
-
-void log_board(const std::string &message) 
-{
-    if (log_file.is_open()) {
-        log_file << "BOARD: " << message << std::endl;
-    }
-}
-
 void manage_input(const std::string &message) 
 {
     if (log_file.is_open()) {
@@ -75,7 +30,6 @@ void start_new_game()
     chess_rules.set_start_positions();
 }
 
-
 void handle_isready() 
 {   
     manage_output("readyok");
@@ -91,11 +45,6 @@ void handle_uci()
 {
     identify_engine();
     manage_output("uciok");
-}
-
-void log_positions()
-{
-    log_graphic_chessboard(chess_rules.get_char_list_board());
 }
 
 void handle_ucinewgame() 
@@ -133,7 +82,7 @@ void handle_go(std::stringstream &ss)
     ss >> search_command;
     // TODO searching parameters
 
-    best_move = chess_algorithm.get_best_move_nega_max(chess_rules, 3);
+    best_move = chess_algorithm.get_best_move_nega_max(chess_rules, 2);
     chess_rules.apply_move_startpos(best_move);
 
     manage_output("bestmove " + best_move);
@@ -163,15 +112,15 @@ void UCI_loop()
         }
         else if (command == "ucinewgame") {
             handle_ucinewgame();
-            log_positions();
+            helpers::log_graphic_chessboard(chess_rules.get_char_list_board());
         }
         else if (command == "position") {
             handle_position(ss);
-            log_positions();
+            helpers::log_graphic_chessboard(chess_rules.get_char_list_board());
         }
         else if (command == "go") {
             handle_go(ss);
-            log_positions();
+            helpers::log_graphic_chessboard(chess_rules.get_char_list_board());
         }
         else if (command == "quit") {
             handle_quit();
