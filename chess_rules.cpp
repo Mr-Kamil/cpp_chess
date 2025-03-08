@@ -1,14 +1,5 @@
 #include "chess_rules.h"
 
-// void const print_moves_string_(std::vector<std::string> &moves)
-// {
-//     std::cout << "Print moves...\n";
-//     for (const std::string &move : moves) {
-//         std::cout << move << std::endl;
-//     }
-// }
-
-// std::string bitboard_representation = R"(
 // Bitboard
 //             A  B  C  D  E  F  G  H
 // bits:    8  0  0  0  0  0  0  0  1  8     bytes: 0x80'00'00'00'00'00'00'00ULL
@@ -31,8 +22,6 @@
 //         2  P  P  P  P  P  P  P  P  2     
 //         1  R  N  B  Q  K  B  N  R  1     
 //            A  B  C  D  E  F  G  H
-
-// )";
 
 
 ChessRules::ChessRules()

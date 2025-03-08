@@ -7,10 +7,8 @@
 #include <sstream>
 #include <vector>
 
-
 typedef uint64_t Bitboard;
 class ChessAlgorithm;
-
 
 class ChessRules
 {
