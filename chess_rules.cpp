@@ -36,23 +36,23 @@
 
 
 ChessRules::ChessRules()
-  : FILE_A(0x0101010101010101ULL),
-    FILE_B(0x0202020202020202ULL),
-    FILE_C(0x0404040404040404ULL),
-    FILE_D(0x0808080808080808ULL),
-    FILE_E(0x1010101010101010ULL),
-    FILE_F(0x2020202020202020ULL),
-    FILE_G(0x4040404040404040ULL),
-    FILE_H(0x8080808080808080ULL),
+  : FILE_A(0x01'01'01'01'01'01'01'01ULL),
+    FILE_B(0x02'02'02'02'02'02'02'02ULL),
+    FILE_C(0x04'04'04'04'04'04'04'04ULL),
+    FILE_D(0x08'08'08'08'08'08'08'08ULL),
+    FILE_E(0x10'10'10'10'10'10'10'10ULL),
+    FILE_F(0x20'20'20'20'20'20'20'20ULL),
+    FILE_G(0x40'40'40'40'40'40'40'40ULL),
+    FILE_H(0x80'80'80'80'80'80'80'80ULL),
 
-    RANK_1(0x00000000000000FFULL),
-    RANK_2(0x000000000000FF00ULL),
-    RANK_3(0x0000000000FF0000ULL),
-    RANK_4(0x00000000FF000000ULL),
-    RANK_5(0x000000FF00000000ULL),
-    RANK_6(0x0000FF0000000000ULL),
-    RANK_7(0x00FF000000000000ULL),
-    RANK_8(0xFF00000000000000ULL),
+    RANK_1(0x00'00'00'00'00'00'00'FFULL),
+    RANK_2(0x00'00'00'00'00'00'FF'00ULL),
+    RANK_3(0x00'00'00'00'00'FF'00'00ULL),
+    RANK_4(0x00'00'00'00'FF'00'00'00ULL),
+    RANK_5(0x00'00'00'FF'00'00'00'00ULL),
+    RANK_6(0x00'00'FF'00'00'00'00'00ULL),
+    RANK_7(0x00'FF'00'00'00'00'00'00ULL),
+    RANK_8(0xFF'00'00'00'00'00'00'00ULL),
 
     BOUNDARIES(FILE_A | FILE_H | RANK_1 | RANK_8),
 
@@ -638,7 +638,38 @@ void ChessRules::apply_move_startpos(const std::string &move)
         promotion_piece = move[4];
     }
 
-    // TODO: castlings
+    if (((0x10'00'00'00'00'00'00'00ULL) & (1ULL << target)) || 
+        ((0x10'00'00'00'00'00'00'00ULL) & (1ULL << source))) {
+        black_king_side_castling = false;
+        black_queen_side_castling = false;
+    }
+
+    if (((0x80'00'00'00'00'00'00'00ULL) & (1ULL << target)) || 
+        ((0x80'00'00'00'00'00'00'00ULL) & (1ULL << source))) {
+        black_king_side_castling = false;
+    }
+
+    if (((0x01'00'00'00'00'00'00'00ULL) & (1ULL << target)) || 
+        ((0x01'00'00'00'00'00'00'00ULL) & (1ULL << source))) {
+        black_queen_side_castling = false;
+    }
+
+    if (((0x00'00'00'00'00'00'00'10ULL) & (1ULL << target)) || 
+        ((0x00'00'00'00'00'00'00'10ULL) & (1ULL << source))) {
+        white_king_side_castling = false;
+        white_queen_side_castling = false;
+    }
+
+    if (((0x80'00'00'00'00'00'00'00ULL) & (1ULL << target)) || 
+        ((0x80'00'00'00'00'00'00'00ULL) & (1ULL << source))) {
+        white_king_side_castling = false;
+    }
+
+    if (((0x01'00'00'00'00'00'00'00ULL) & (1ULL << target)) || 
+        ((0x01'00'00'00'00'00'00'00ULL) & (1ULL << source))) {
+        white_queen_side_castling = false;
+    }
+
 
     // clear target square
     uint64_t end_piece_mask = (1ULL << target);
