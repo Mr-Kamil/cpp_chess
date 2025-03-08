@@ -18,6 +18,8 @@ void log_input(const std::string &message);
 
 void log_output(const std::string &message);
 
+void const print_moves_string_(std::vector<std::string> &moves);
+
 } // helpers
 
 #endif // HELP_FUNCTIONS_H

@@ -59,3 +59,11 @@ void helpers::log_output(const std::string &message)
     }
     std::cout << message + "\n" << std::endl;
 }
+
+void const helpers::print_moves_string_(std::vector<std::string> &moves)
+{
+    std::cout << "Print moves...\n";
+    for (const std::string &move : moves) {
+        std::cout << move << std::endl;
+    }
+}
