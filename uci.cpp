@@ -82,7 +82,7 @@ void handle_isready()
 
 void identify_engine() 
 {
-    manage_output("id name TryChess 0.1");
+    manage_output("id name cpp_chess 1.0");
     manage_output("id author Kamil Bylinka");
 }
 
@@ -130,7 +130,6 @@ void handle_go(std::stringstream &ss)
     std::string best_move;
     
     ss >> search_command;
-    // TODO
     best_move = chess_rules.get_best_move_nega_max(3);
     chess_rules.apply_move_startpos(best_move);
 
