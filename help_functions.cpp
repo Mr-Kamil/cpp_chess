@@ -57,7 +57,6 @@ void helpers::log_output(const std::string &message)
     if (log_file.is_open()) {
         log_file << "SEND: " << message << std::endl;
     }
-    std::cout << message + "\n" << std::endl;
 }
 
 void const helpers::print_moves_string_(std::vector<std::string> &moves)

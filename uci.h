@@ -9,6 +9,8 @@
 extern ChessRules chess_rules;
 extern std::ofstream log_file;
 
+void manage_output(const std::string &message);
+
 void reset_board();
 
 void start_new_game();

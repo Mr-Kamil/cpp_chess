@@ -5,6 +5,12 @@ ChessAlgorithm chess_algorithm = ChessAlgorithm();
 std::ofstream log_file("uci_log.txt");
 
 
+void manage_output(const std::string &message)
+{
+    helpers::log_output(message);
+    std::cout << message + "\n" << std::endl;
+}
+
 void reset_board()
 {
     chess_rules.set_start_positions();
@@ -17,25 +23,25 @@ void start_new_game()
 
 void handle_isready() 
 {   
-    helpers::log_output("readyok");
+    manage_output("readyok");
 }
 
 void identify_engine() 
 {
-    helpers::log_output("id name cpp_chess 1.0");
-    helpers::log_output("id author Kamil Bylinka");
+    manage_output("id name cpp_chess 1.0");
+    manage_output("id author Kamil Bylinka");
 }
 
 void handle_uci() 
 {
     identify_engine();
-    helpers::log_output("uciok");
+    manage_output("uciok");
 }
 
 void handle_ucinewgame() 
 {
     start_new_game();
-    helpers::log_output("New game initialized");
+    manage_output("New game initialized");
 }
 
 void handle_position(std::stringstream &ss) 
@@ -70,12 +76,12 @@ void handle_go(std::stringstream &ss)
     best_move = chess_algorithm.get_best_move_nega_max(chess_rules, 2);
     chess_rules.apply_move_startpos(best_move);
 
-    helpers::log_output("bestmove " + best_move);
+    manage_output("bestmove " + best_move);
 }
 
 void handle_quit()
 {
-    helpers::log_output("Exiting...");
+    manage_output("Exiting...");
 }
 
 void UCI_loop()
