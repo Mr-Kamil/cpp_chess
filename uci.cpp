@@ -4,26 +4,11 @@ ChessRules chess_rules = ChessRules();
 ChessAlgorithm chess_algorithm = ChessAlgorithm();
 std::ofstream log_file("uci_log.txt");
 
-void manage_input(const std::string &message) 
-{
-    if (log_file.is_open()) {
-        log_file << "\nREAD: " << message << std::endl;
-    }
-}
-
-void manage_output(const std::string &message) 
-{
-    if (log_file.is_open()) {
-        log_file << "SEND: " << message << std::endl;
-    }
-    std::cout << message + "\n" << std::endl;
-}
 
 void reset_board()
 {
     chess_rules.set_start_positions();
 }
-
 
 void start_new_game() 
 {
@@ -32,25 +17,25 @@ void start_new_game()
 
 void handle_isready() 
 {   
-    manage_output("readyok");
+    helpers::log_output("readyok");
 }
 
 void identify_engine() 
 {
-    manage_output("id name cpp_chess 1.0");
-    manage_output("id author Kamil Bylinka");
+    helpers::log_output("id name cpp_chess 1.0");
+    helpers::log_output("id author Kamil Bylinka");
 }
 
 void handle_uci() 
 {
     identify_engine();
-    manage_output("uciok");
+    helpers::log_output("uciok");
 }
 
 void handle_ucinewgame() 
 {
     start_new_game();
-    manage_output("New game initialized");
+    helpers::log_output("New game initialized");
 }
 
 void handle_position(std::stringstream &ss) 
@@ -85,12 +70,12 @@ void handle_go(std::stringstream &ss)
     best_move = chess_algorithm.get_best_move_nega_max(chess_rules, 2);
     chess_rules.apply_move_startpos(best_move);
 
-    manage_output("bestmove " + best_move);
+    helpers::log_output("bestmove " + best_move);
 }
 
 void handle_quit()
 {
-    manage_output("Exiting...");
+    helpers::log_output("Exiting...");
 }
 
 void UCI_loop()
@@ -102,7 +87,7 @@ void UCI_loop()
         std::stringstream ss(input);
         ss >> command;
 
-        manage_input(input);
+        helpers::log_input(input);
 
         if (command == "uci") {
             handle_uci();

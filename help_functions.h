@@ -14,6 +14,10 @@ void log_graphic_chessboard(const std::string &board_str);
 
 void log_board(const std::string &message);
 
+void log_input(const std::string &message);
+
+void log_output(const std::string &message);
+
 } // helpers
 
 #endif // HELP_FUNCTIONS_H

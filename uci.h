@@ -9,10 +9,6 @@
 extern ChessRules chess_rules;
 extern std::ofstream log_file;
 
-void manage_input(const std::string &message);
-
-void manage_output(const std::string &message);
-
 void reset_board();
 
 void start_new_game();
@@ -22,8 +18,6 @@ void handle_isready();
 void identify_engine();
 
 void handle_uci(); 
-
-void log_positions();
 
 void handle_ucinewgame();
 

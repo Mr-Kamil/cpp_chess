@@ -44,3 +44,18 @@ void helpers::log_board(const std::string &message)
         log_file << "BOARD: " << message << std::endl;
     }
 }
+
+void helpers::log_input(const std::string &message) 
+{
+    if (log_file.is_open()) {
+        log_file << "\nREAD: " << message << std::endl;
+    }
+}
+
+void helpers::log_output(const std::string &message) 
+{
+    if (log_file.is_open()) {
+        log_file << "SEND: " << message << std::endl;
+    }
+    std::cout << message + "\n" << std::endl;
+}
