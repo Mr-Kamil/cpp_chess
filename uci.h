@@ -1,12 +1,9 @@
 #ifndef UCI_H
 #define UCI_H
 
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <sstream>
 #include <fstream>
 #include "chess_rules.h"
+#include "chess_algorithm.h"
 
 extern ChessRules chess_rules;
 extern std::ofstream log_file;

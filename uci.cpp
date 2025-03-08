@@ -1,6 +1,7 @@
 #include "uci.h"
 
 ChessRules chess_rules = ChessRules();
+ChessAlgorithm chess_algorithm = ChessAlgorithm();
 std::ofstream log_file("uci_log.txt");
 
 void log_bitboard_as_bytes(Bitboard board)
@@ -130,7 +131,9 @@ void handle_go(std::stringstream &ss)
     std::string best_move;
     
     ss >> search_command;
-    best_move = chess_rules.get_best_move_nega_max(3);
+    // TODO searching parameters
+
+    best_move = chess_algorithm.get_best_move_nega_max(chess_rules, 3);
     chess_rules.apply_move_startpos(best_move);
 
     manage_output("bestmove " + best_move);

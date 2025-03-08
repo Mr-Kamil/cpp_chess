@@ -9,9 +9,13 @@
 
 
 typedef uint64_t Bitboard;
+class ChessAlgorithm;
+
 
 class ChessRules
 {
+    friend class ChessAlgorithm;
+
     const Bitboard FILE_A;
     const Bitboard FILE_B;
     const Bitboard FILE_C;
@@ -235,16 +239,6 @@ private:
 public:
     std::string bitboards_to_move(Bitboard move_begin, Bitboard move_end);
 
-public:
-    std::string get_best_move_nega_max(int depth);
-
-public:
-    int find_nega_max_move_alpha_beta(
-        int depth, int max_depth, int turn_multiplier, int alpha, int beta
-        );
-
-public:
-    int score_material();
 };
 
 #endif // CHESS_RULES_H

@@ -643,28 +643,25 @@ void ChessRules::apply_move_startpos(const std::string &move)
         black_king_side_castling = false;
         black_queen_side_castling = false;
     }
-
     if (((0x80'00'00'00'00'00'00'00ULL) & (1ULL << target)) || 
         ((0x80'00'00'00'00'00'00'00ULL) & (1ULL << source))) {
         black_king_side_castling = false;
     }
-
     if (((0x01'00'00'00'00'00'00'00ULL) & (1ULL << target)) || 
         ((0x01'00'00'00'00'00'00'00ULL) & (1ULL << source))) {
         black_queen_side_castling = false;
     }
+
 
     if (((0x00'00'00'00'00'00'00'10ULL) & (1ULL << target)) || 
         ((0x00'00'00'00'00'00'00'10ULL) & (1ULL << source))) {
         white_king_side_castling = false;
         white_queen_side_castling = false;
     }
-
     if (((0x80'00'00'00'00'00'00'00ULL) & (1ULL << target)) || 
         ((0x80'00'00'00'00'00'00'00ULL) & (1ULL << source))) {
         white_king_side_castling = false;
     }
-
     if (((0x01'00'00'00'00'00'00'00ULL) & (1ULL << target)) || 
         ((0x01'00'00'00'00'00'00'00ULL) & (1ULL << source))) {
         white_queen_side_castling = false;
@@ -1146,83 +1143,6 @@ std::string ChessRules::bitboards_to_move(Bitboard move_begin, Bitboard move_end
     std::string end_square = _index_to_square(end_index);
 
     return begin_square + end_square;
-}
-
-std::string ChessRules::get_best_move_nega_max(int depth)
-{
-    this->next_move = "";
-    int turn_multiplier = this->white_to_move ? 1 : -1;
-    int alpha = -this->checkmate;
-    int beta = this->checkmate;
-    this->find_nega_max_move_alpha_beta(depth, depth, turn_multiplier, alpha, beta);
-
-    return this->next_move;
-}
-
-int ChessRules::find_nega_max_move_alpha_beta(
-    int depth, int max_depth, int turn_multiplier, int alpha, int beta
-    ) 
-{
-    if (depth == 0) {
-        return turn_multiplier * this->score_material();
-    }
-
-    int max_score = -this->checkmate;
-    std::vector<std::string> valid_moves = this->get_all_valid_moves_str();
-
-    for (int n = 0; n < valid_moves.size(); n++) {
-        std::string move = valid_moves[n];
-
-        this->apply_move_startpos(move);
-        int score = -find_nega_max_move_alpha_beta(
-            depth - 1, max_depth, -turn_multiplier, -beta, -alpha
-            );
-        this->undo_move();
-
-        if (score >= max_score) {
-            max_score = score;
-            if (depth == max_depth) {
-                this->next_move = move;
-            }
-        }
-
-        alpha = std::max(alpha, max_score);
-        if (alpha >= beta) {
-            break;
-        }
-    }
-    return max_score;
-}
-
-int ChessRules::score_material()
-{
-    int score = 0;
-
-    auto count_bits = [](Bitboard bitboard) -> int 
-    {
-        int count = 0;
-        while (bitboard) {
-            count += bitboard & 1;
-            bitboard >>= 1;
-        }
-        return count;
-    };
-
-    score += this->PAWN_VALUE * count_bits(this->white_pawns);
-    score += this->KNIGHT_VALUE * count_bits(this->white_knights);
-    score += this->BISHOP_VALUE * count_bits(this->white_bishops);
-    score += this->ROOK_VALUE * count_bits(this->white_rooks);
-    score += this->QUEEN_VALUE * count_bits(this->white_queens);
-    score += this->KING_VALUE * count_bits(this->white_king);
-
-    score -= this->PAWN_VALUE * count_bits(this->black_pawns);
-    score -= this->KNIGHT_VALUE * count_bits(this->black_knights);
-    score -= this->BISHOP_VALUE * count_bits(this->black_bishops);
-    score -= this->ROOK_VALUE * count_bits(this->black_rooks);
-    score -= this->QUEEN_VALUE * count_bits(this->black_queens);
-    score -= this->KING_VALUE * count_bits(this->black_king);
-
-    return score;
 }
 
 
