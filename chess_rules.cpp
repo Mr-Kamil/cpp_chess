@@ -1,27 +1,29 @@
 #include "chess_rules.h"
 
-// Bitboard
-//             A  B  C  D  E  F  G  H
-// bits:    8  0  0  0  0  0  0  0  1  8     bytes: 0x80'00'00'00'00'00'00'00ULL
-// bits:    7  0  0  0  0  0  0  1  0  7     bytes: 0x00'40'00'00'00'00'00'00ULL
-// bits:    6  0  0  0  0  0  1  0  0  6     bytes: 0x00'00'20'00'00'00'00'00ULL
-// bits:    5  0  0  0  0  1  0  0  0  5     bytes: 0x00'00'00'10'00'00'00'00ULL
-// bits:    4  0  0  0  1  0  0  0  0  4     bytes: 0x00'00'00'00'08'00'00'00ULL
-// bits:    3  0  0  1  0  0  0  0  0  3     bytes: 0x00'00'00'00'00'04'00'00ULL
-// bits:    2  0  1  0  0  0  0  0  0  2     bytes: 0x00'00'00'00'00'00'02'00ULL
-// bits:    1  1  0  0  0  0  0  0  0  1     bytes: 0x00'00'00'00'00'00'00'01ULL
-//             A  B  C  D  E  F  G  H
+/*
+Bitboard
+            A  B  C  D  E  F  G  H
+bits:    8  0  0  0  0  0  0  0  1  8     bytes: 0x80'00'00'00'00'00'00'00ULL
+bits:    7  0  0  0  0  0  0  1  0  7     bytes: 0x00'40'00'00'00'00'00'00ULL
+bits:    6  0  0  0  0  0  1  0  0  6     bytes: 0x00'00'20'00'00'00'00'00ULL
+bits:    5  0  0  0  0  1  0  0  0  5     bytes: 0x00'00'00'10'00'00'00'00ULL
+bits:    4  0  0  0  1  0  0  0  0  4     bytes: 0x00'00'00'00'08'00'00'00ULL
+bits:    3  0  0  1  0  0  0  0  0  3     bytes: 0x00'00'00'00'00'04'00'00ULL
+bits:    2  0  1  0  0  0  0  0  0  2     bytes: 0x00'00'00'00'00'00'02'00ULL
+bits:    1  1  0  0  0  0  0  0  0  1     bytes: 0x00'00'00'00'00'00'00'01ULL
+            A  B  C  D  E  F  G  H
 
-//            A  B  C  D  E  F  G  H
-//         8  r  n  b  q  k  b  n  r  8     
-//         7  p  p  p  p  p  p  p  p  7     
-//         6  0  0  0  0  0  0  0  0  6     
-//         5  0  0  0  0  0  0  0  0  5     
-//         4  0  0  0  0  0  0  0  0  4     
-//         3  0  0  0  0  0  0  0  0  3     
-//         2  P  P  P  P  P  P  P  P  2     
-//         1  R  N  B  Q  K  B  N  R  1     
-//            A  B  C  D  E  F  G  H
+           A  B  C  D  E  F  G  H
+        8  r  n  b  q  k  b  n  r  8     
+        7  p  p  p  p  p  p  p  p  7     
+        6  0  0  0  0  0  0  0  0  6     
+        5  0  0  0  0  0  0  0  0  5     
+        4  0  0  0  0  0  0  0  0  4     
+        3  0  0  0  0  0  0  0  0  3     
+        2  P  P  P  P  P  P  P  P  2     
+        1  R  N  B  Q  K  B  N  R  1     
+           A  B  C  D  E  F  G  H
+*/
 
 
 ChessRules::ChessRules()
