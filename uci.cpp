@@ -11,14 +11,11 @@ void manage_output(const std::string &message)
     std::cout << message + "\n" << std::endl;
 }
 
-void reset_board()
-{
-    chess_rules.set_start_positions();
-}
-
 void start_new_game() 
 {
     chess_rules.set_start_positions();
+    chess_rules.set_board_starting_variables();
+    chess_rules.clear_move_logs();
 }
 
 void handle_isready() 
@@ -50,14 +47,7 @@ void handle_position(std::stringstream &ss)
     ss >> subcommand;
 
     if (subcommand == "startpos") {
-        reset_board();
-        std::string moves;
-        if (ss >> moves && moves == "moves") {
-            std::string move;
-            while (ss >> move) {
-                chess_rules.apply_move_startpos(move);
-            }
-        }
+        chess_rules.apply_moves_startpos(ss);
     } else if (subcommand == "fen") {
         std::string fen;
         std::getline(ss, fen);

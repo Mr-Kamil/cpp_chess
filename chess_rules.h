@@ -14,25 +14,25 @@ class ChessRules
 {
     friend class ChessAlgorithm;
 
-    const Bitboard FILE_A;
-    const Bitboard FILE_B;
-    const Bitboard FILE_C;
-    const Bitboard FILE_D;
-    const Bitboard FILE_E;
-    const Bitboard FILE_F;
-    const Bitboard FILE_G;
-    const Bitboard FILE_H;
+    static constexpr Bitboard FILE_A = 0x01'01'01'01'01'01'01'01ULL;
+    static constexpr Bitboard FILE_B = 0x02'02'02'02'02'02'02'02ULL;
+    static constexpr Bitboard FILE_C = 0x04'04'04'04'04'04'04'04ULL;
+    static constexpr Bitboard FILE_D = 0x08'08'08'08'08'08'08'08ULL;
+    static constexpr Bitboard FILE_E = 0x10'10'10'10'10'10'10'10ULL;
+    static constexpr Bitboard FILE_F = 0x20'20'20'20'20'20'20'20ULL;
+    static constexpr Bitboard FILE_G = 0x40'40'40'40'40'40'40'40ULL;
+    static constexpr Bitboard FILE_H = 0x80'80'80'80'80'80'80'80ULL;
 
-    const Bitboard RANK_1;
-    const Bitboard RANK_2;
-    const Bitboard RANK_3;
-    const Bitboard RANK_4;
-    const Bitboard RANK_5;
-    const Bitboard RANK_6;
-    const Bitboard RANK_7;
-    const Bitboard RANK_8;
+    static constexpr Bitboard RANK_1 = 0x00'00'00'00'00'00'00'FFULL;
+    static constexpr Bitboard RANK_2 = 0x00'00'00'00'00'00'FF'00ULL;
+    static constexpr Bitboard RANK_3 = 0x00'00'00'00'00'FF'00'00ULL;
+    static constexpr Bitboard RANK_4 = 0x00'00'00'00'FF'00'00'00ULL;
+    static constexpr Bitboard RANK_5 = 0x00'00'00'FF'00'00'00'00ULL;
+    static constexpr Bitboard RANK_6 = 0x00'00'FF'00'00'00'00'00ULL;
+    static constexpr Bitboard RANK_7 = 0x00'FF'00'00'00'00'00'00ULL;
+    static constexpr Bitboard RANK_8 = 0xFF'00'00'00'00'00'00'00ULL;
 
-    const Bitboard BOUNDARIES ;
+    static constexpr Bitboard BOUNDARIES = FILE_A | FILE_H | RANK_1 | RANK_8;
 
     static constexpr char EMPTY = '0';
     static constexpr char PAWN_WHITE = 'P', 
@@ -84,29 +84,22 @@ public:
     int fullmove_number;
 
     std::vector<std::string> move_logs;
-    
-    const int PAWN_VALUE;
-    const int KNIGHT_VALUE;
-    const int BISHOP_VALUE;
-    const int ROOK_VALUE;
-    const int QUEEN_VALUE;
-    const int KING_VALUE;
-
-    const int checkmate;
 
     std::string next_move;
 
     ChessRules();
 
+    void set_new_game();
+
     void set_start_positions();
 
-    void reset();
+    void clear_board();
 
-    void update_board_variables();
+    void set_board_starting_variables();
 
     void clear_move_logs();
 
-    void add_move_log(std::string move_log);
+    void add_move_log(const std::string &move_log);
 
     void delete_last_log_move();
 
@@ -148,9 +141,9 @@ public:
         Bitboard start_square, Bitboard moves_end_squares
         );
 
-    int _bitboard_to_index(Bitboard bitboard);
+    int bitboard_to_index(Bitboard bitboard);
 
-    std::string _index_to_square(int index);
+    std::string index_to_square(int index);
 
     Bitboard get_full_board();
 
@@ -173,6 +166,8 @@ public:
     bool check_is_move_str_valid(std::string &move);
 
     std::pair<int, int> move_to_square_indices(const std::string &move);
+
+    void apply_moves_startpos(std::stringstream &moves);
 
     void apply_move_startpos(const std::string &move);
 

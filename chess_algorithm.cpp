@@ -1,12 +1,14 @@
 #include "chess_algorithm.h"
 
 
-std::string ChessAlgorithm::get_best_move_nega_max(ChessRules& chess_rules, int depth)
+std::string ChessAlgorithm::get_best_move_nega_max(
+    ChessRules &chess_rules, int depth
+) const
 {
     chess_rules.next_move = "";
     int turn_multiplier = chess_rules.white_to_move ? 1 : -1;
-    int alpha = -chess_rules.checkmate;
-    int beta = chess_rules.checkmate;
+    int alpha = -this->checkmate;
+    int beta = this->checkmate;
     this->find_nega_max_move_alpha_beta(
         chess_rules, depth, depth, turn_multiplier, alpha, beta
     );
@@ -15,15 +17,15 @@ std::string ChessAlgorithm::get_best_move_nega_max(ChessRules& chess_rules, int 
 }
 
 int ChessAlgorithm::find_nega_max_move_alpha_beta(
-    ChessRules& chess_rules, int depth, int max_depth, 
+    ChessRules &chess_rules, int depth, int &max_depth, 
     int turn_multiplier, int alpha, int beta
-    ) 
+    ) const 
 {
     if (depth == 0) {
         return turn_multiplier * this->score_material(chess_rules);
     }
 
-    int max_score = -chess_rules.checkmate;
+    int max_score = -this->checkmate;
     std::vector<std::string> valid_moves = chess_rules.get_all_valid_moves_str();
 
     for (int n = 0; n < valid_moves.size(); n++) {
@@ -50,7 +52,7 @@ int ChessAlgorithm::find_nega_max_move_alpha_beta(
     return max_score;
 }
 
-int ChessAlgorithm::score_material(ChessRules& chess_rules)
+int ChessAlgorithm::score_material(ChessRules &chess_rules) const
 {
     int score = 0;
 
@@ -64,19 +66,19 @@ int ChessAlgorithm::score_material(ChessRules& chess_rules)
         return count;
     };
 
-    score += chess_rules.PAWN_VALUE * count_bits(chess_rules.white_pawns);
-    score += chess_rules.KNIGHT_VALUE * count_bits(chess_rules.white_knights);
-    score += chess_rules.BISHOP_VALUE * count_bits(chess_rules.white_bishops);
-    score += chess_rules.ROOK_VALUE * count_bits(chess_rules.white_rooks);
-    score += chess_rules.QUEEN_VALUE * count_bits(chess_rules.white_queens);
-    score += chess_rules.KING_VALUE * count_bits(chess_rules.white_king);
+    score += this->PAWN_VALUE * count_bits(chess_rules.white_pawns);
+    score += this->KNIGHT_VALUE * count_bits(chess_rules.white_knights);
+    score += this->BISHOP_VALUE * count_bits(chess_rules.white_bishops);
+    score += this->ROOK_VALUE * count_bits(chess_rules.white_rooks);
+    score += this->QUEEN_VALUE * count_bits(chess_rules.white_queens);
+    score += this->KING_VALUE * count_bits(chess_rules.white_king);
 
-    score -= chess_rules.PAWN_VALUE * count_bits(chess_rules.black_pawns);
-    score -= chess_rules.KNIGHT_VALUE * count_bits(chess_rules.black_knights);
-    score -= chess_rules.BISHOP_VALUE * count_bits(chess_rules.black_bishops);
-    score -= chess_rules.ROOK_VALUE * count_bits(chess_rules.black_rooks);
-    score -= chess_rules.QUEEN_VALUE * count_bits(chess_rules.black_queens);
-    score -= chess_rules.KING_VALUE * count_bits(chess_rules.black_king);
+    score -= this->PAWN_VALUE * count_bits(chess_rules.black_pawns);
+    score -= this->KNIGHT_VALUE * count_bits(chess_rules.black_knights);
+    score -= this->BISHOP_VALUE * count_bits(chess_rules.black_bishops);
+    score -= this->ROOK_VALUE * count_bits(chess_rules.black_rooks);
+    score -= this->QUEEN_VALUE * count_bits(chess_rules.black_queens);
+    score -= this->KING_VALUE * count_bits(chess_rules.black_king);
 
     return score;
 }

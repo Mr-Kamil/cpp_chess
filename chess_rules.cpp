@@ -27,39 +27,15 @@ bits:    1  1  0  0  0  0  0  0  0  1     bytes: 0x00'00'00'00'00'00'00'01ULL
 
 
 ChessRules::ChessRules()
-  : FILE_A(0x01'01'01'01'01'01'01'01ULL),
-    FILE_B(0x02'02'02'02'02'02'02'02ULL),
-    FILE_C(0x04'04'04'04'04'04'04'04ULL),
-    FILE_D(0x08'08'08'08'08'08'08'08ULL),
-    FILE_E(0x10'10'10'10'10'10'10'10ULL),
-    FILE_F(0x20'20'20'20'20'20'20'20ULL),
-    FILE_G(0x40'40'40'40'40'40'40'40ULL),
-    FILE_H(0x80'80'80'80'80'80'80'80ULL),
-
-    RANK_1(0x00'00'00'00'00'00'00'FFULL),
-    RANK_2(0x00'00'00'00'00'00'FF'00ULL),
-    RANK_3(0x00'00'00'00'00'FF'00'00ULL),
-    RANK_4(0x00'00'00'00'FF'00'00'00ULL),
-    RANK_5(0x00'00'00'FF'00'00'00'00ULL),
-    RANK_6(0x00'00'FF'00'00'00'00'00ULL),
-    RANK_7(0x00'FF'00'00'00'00'00'00ULL),
-    RANK_8(0xFF'00'00'00'00'00'00'00ULL),
-
-    BOUNDARIES(FILE_A | FILE_H | RANK_1 | RANK_8),
-
-    PAWN_VALUE(1),
-    KNIGHT_VALUE(3),
-    BISHOP_VALUE(3),
-    ROOK_VALUE(5),
-    QUEEN_VALUE(9),
-    KING_VALUE(1000),
-    
-    checkmate(1000)
 {
-    move_logs = {};
+    this->set_new_game();
+}
 
+void ChessRules::set_new_game()
+{
+    this->move_logs = {};
     this->set_start_positions();
-    this->clear_move_logs();
+    this->set_board_starting_variables();
 }
 
 void ChessRules::set_start_positions()
@@ -78,10 +54,14 @@ void ChessRules::set_start_positions()
     this->black_queens = 0x08'00'00'00'00'00'00'00ULL;
     this->black_king = 0x10'00'00'00'00'00'00'00ULL;
 
-    this->update_board_variables();
+    this->white_board = white_pawns | white_knights | white_rooks |
+                        white_bishops | white_queens | white_king;
+    this->black_board = black_pawns | black_knights | black_rooks |
+                        black_bishops | black_queens | black_king;
+    this->full_board = white_board | black_board;
 }
 
-void ChessRules::reset()
+void ChessRules::clear_board()
 {
     this->white_pawns = 0x00'00'00'00'00'00'00'00ULL;
     this->white_knights = 0x00'00'00'00'00'00'00'00ULL;
@@ -97,17 +77,12 @@ void ChessRules::reset()
     this->black_queens = 0x00'00'00'00'00'00'00'00ULL;
     this->black_king = 0x00'00'00'00'00'00'00'00ULL;
 
-    this->update_board_variables();
+    this->set_board_starting_variables();
+    this->clear_move_logs();
 }
 
-void ChessRules::update_board_variables()
+void ChessRules::set_board_starting_variables()
 {
-    this->white_board = white_pawns | white_knights | white_rooks |
-                        white_bishops | white_queens | white_king;
-    this->black_board = black_pawns | black_knights | black_rooks |
-                        black_bishops | black_queens | black_king;
-    this->full_board = white_board | black_board;
-
     this->last_move_begin = 0ULL;
     this->last_move_end = 0ULL;
 
@@ -126,10 +101,10 @@ void ChessRules::update_board_variables()
 
 void ChessRules::clear_move_logs()
 {
-    this->move_logs = {};
+    this->move_logs.clear();
 }
 
-void ChessRules::add_move_log(std::string move_log)
+void ChessRules::add_move_log(const std::string &move_log)
 {
     this->move_logs.push_back(move_log);
 }
@@ -617,9 +592,22 @@ std::pair<int, int> ChessRules::move_to_square_indices(const std::string &move)
     return {source, target};
 }
 
-void ChessRules::apply_move_startpos(const std::string &move)
+void ChessRules::apply_moves_startpos(std::stringstream &ss)
 {
     // e.g: position startpos moves [e2e4 e7e5 g1f3 b8c6 a7b8q]
+
+    this->clear_board();
+    std::string moves;
+    if (ss >> moves && moves == "moves") {
+        std::string move;
+        while (ss >> move) {
+            this->apply_move_startpos(move);
+        }
+    }
+}
+
+void ChessRules::apply_move_startpos(const std::string &move)
+{
     std::pair<int, int> indicases = this->move_to_square_indices(move);
     int source = indicases.first;
     int target = indicases.second;
@@ -657,7 +645,6 @@ void ChessRules::apply_move_startpos(const std::string &move)
         ((0x01'00'00'00'00'00'00'00ULL) & (1ULL << source))) {
         white_queen_side_castling = false;
     }
-
 
     // clear target square
     uint64_t end_piece_mask = (1ULL << target);
@@ -886,7 +873,7 @@ std::string ChessRules::generate_current_fen()
 void ChessRules::apply_move_fen(const std::string &fen)
 {
     // e.g: position fen [rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1]
-    this->reset();
+    this->clear_board();
 
     std::istringstream ss(fen);
     std::string position, active_color, castling, en_passant, halfmove_str, fullmove_str;
@@ -1098,11 +1085,12 @@ void ChessRules::undo_move()
         this->delete_last_log_move();
     } else {
         this->set_start_positions();
+        this->set_board_starting_variables();
         this->clear_move_logs();
     }
 }
 
-int ChessRules::_bitboard_to_index(Bitboard bitboard) 
+int ChessRules::bitboard_to_index(Bitboard bitboard) 
 {
     int index = 0;
 
@@ -1116,7 +1104,7 @@ int ChessRules::_bitboard_to_index(Bitboard bitboard)
     return -1;
 }
 
-std::string ChessRules::_index_to_square(int index) 
+std::string ChessRules::index_to_square(int index) 
 {
     int file = index % 8;
     int rank = index / 8;
@@ -1127,11 +1115,11 @@ std::string ChessRules::_index_to_square(int index)
 
 std::string ChessRules::bitboards_to_move(Bitboard move_begin, Bitboard move_end) 
 {
-    int begin_index = _bitboard_to_index(move_begin);
-    int end_index = _bitboard_to_index(move_end);
+    int begin_index = bitboard_to_index(move_begin);
+    int end_index = bitboard_to_index(move_end);
 
-    std::string begin_square = _index_to_square(begin_index);
-    std::string end_square = _index_to_square(end_index);
+    std::string begin_square = index_to_square(begin_index);
+    std::string end_square = index_to_square(end_index);
 
     return begin_square + end_square;
 }
