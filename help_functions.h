@@ -6,9 +6,11 @@
 
 namespace helpers {
 
-void log_bitboard_as_bytes(Bitboard board);
+inline void write_log(const std::string &message);
 
-void log_graphic_bitboard(Bitboard board);
+void log_bitboard_as_bytes(const Bitboard &board);
+
+void log_graphic_bitboard(const Bitboard &board);
 
 void log_graphic_chessboard(const std::string &board_str);
 
@@ -18,7 +20,7 @@ void log_input(const std::string &message);
 
 void log_output(const std::string &message);
 
-void const print_moves_string_(std::vector<std::string> &moves);
+void print_moves_string(const std::vector<std::string> &moves);
 
 } // helpers
 
