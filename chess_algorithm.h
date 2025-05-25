@@ -16,7 +16,9 @@ class ChessAlgorithm
     static constexpr int checkmate = 1000;
 
     public:
-        std::string get_best_move_nega_max(ChessRules &chess_rules, int depth) const;
+        std::string get_best_move_nega_max(
+            ChessRules &chess_rules, int depth
+        ) const;
 
         int find_nega_max_move_alpha_beta(
             ChessRules &chess_rules, int depth, int &max_depth, 
