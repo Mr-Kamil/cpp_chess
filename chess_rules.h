@@ -106,8 +106,8 @@ public:
     int check_square_occupation(Bitboard &move) const;
 
     Bitboard slide_piece(
-        const Bitboard &piece_position, int shift, const Bitboard &boundary_mask, 
-        bool single_move=false
+        const Bitboard &piece_position, int shift, 
+        const Bitboard &boundary_mask, bool single_move=false
     );
 
     Bitboard generate_all_pawns_moves(const Bitboard &pawn_board);
@@ -147,7 +147,7 @@ public:
     void update_all_moves_str(
         std::vector<std::string> &all_moves_str, 
         Bitboard start_square, Bitboard &moves_end_squares
-        );
+    );
 
     Bitboard get_full_board() const;
 
@@ -161,13 +161,17 @@ public:
 
     void apply_move_startpos(const std::string &move);
 
-    void append_piece_or_empty(std::string &position, int &empty_count, const char &piece) const;
+    void append_piece_or_empty(
+        std::string &position, int &empty_count, const char &piece
+    ) const;
 
     std::string generate_current_fen() const;
 
     void apply_move_fen(const std::string &fen);
 
-    std::vector<std::string> get_all_moves_str(std::vector<std::string> &all_moves_str);
+    std::vector<std::string> get_all_moves_str(
+        std::vector<std::string> &all_moves_str
+    );
 
     Bitboard get_all_moves_end();
 
