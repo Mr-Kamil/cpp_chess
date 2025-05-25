@@ -114,12 +114,12 @@ void ChessRules::delete_last_log_move()
     this->move_logs.pop_back();
 }
 
-Bitboard ChessRules::get_full_board()
+Bitboard ChessRules::get_full_board() const
 {
     return this->full_board;
 }
 
-char* ChessRules::get_char_list_board()
+char* ChessRules::get_char_list_board() const
 {
     char* char_board = new char[64];
 
@@ -145,103 +145,7 @@ char* ChessRules::get_char_list_board()
     return char_board;
 }
 
-void ChessRules::get_bitboards_from_char_list(const char* char_board) 
-{
-    white_pawns = 0ULL;
-    white_knights = 0ULL;
-    white_rooks = 0ULL;
-    white_bishops = 0ULL;
-    white_queens = 0ULL;
-    white_king = 0ULL;
-
-    black_pawns = 0ULL;
-    black_knights = 0ULL;
-    black_rooks = 0ULL;
-    black_bishops = 0ULL;
-    black_queens = 0ULL;
-    black_king = 0ULL;
-
-    for (int n = 0; n < 64; ++n) {
-        Bitboard position = 1ULL << n;
-
-        switch (char_board[n]) {
-            case this->PAWN_WHITE:
-                white_pawns |= position;
-                break;
-            case this->KNIGHT_WHITE:
-                white_knights |= position;
-                break;
-            case this->BISHOP_WHITE:
-                white_bishops |= position;
-                break;
-            case this->ROOK_WHITE:
-                white_rooks |= position;
-                break;
-            case this->QUEEN_WHITE:
-                white_queens |= position;
-                break;
-            case this->KING_WHITE:
-                white_king |= position;
-                break;
-
-            case this->PAWN_BLACK:
-                black_pawns |= position;
-                break;
-            case this->KNIGHT_BLACK:
-                black_knights |= position;
-                break;
-            case this->BISHOP_BLACK:
-                black_bishops |= position;
-                break;
-            case this->ROOK_BLACK:
-                black_rooks |= position;
-                break;
-            case this->QUEEN_BLACK:
-                black_queens |= position;
-                break;
-            case this->KING_BLACK:
-                black_king |= position;
-                break;
-
-            case EMPTY:
-                break;
-        }
-    }
-}
-
-void ChessRules::print_bitboard_as_bytes(Bitboard board)
-{
-    std::cout << "Bitboard in hex: 0x" 
-            << std::hex << std::setw(16) << std::setfill('0') 
-            << board << std::endl;
-}
-
-void ChessRules::print_graphic_bitboard(Bitboard board)
-{
-    for (int rank = 7; rank >= 0; --rank) {
-        for (int file = 0; file < 8; ++file) {
-            if (board & (1ULL << (rank * 8 + file)))
-                std::cout << "1  ";
-            else
-                std::cout << "0  ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-}
-
-void ChessRules::print_graphic_chessboard(const std::string &board_str) 
-{
-    for (int rank = 7; rank >= 0; --rank) {
-        for (int file = 0; file < 8; ++file) {
-            int square = rank * 8 + file; 
-            std::cout << board_str[square] << "  ";
-        }
-        std::cout << "\n";
-    }
-}
-
-int ChessRules::check_square_occupation(Bitboard move)
+int ChessRules::check_square_occupation(Bitboard &move) const
 {
     Bitboard enemy_board, allies_board = 0ULL;
     enemy_board = this->white_to_move ? this->black_board : this->white_board;
@@ -257,7 +161,9 @@ int ChessRules::check_square_occupation(Bitboard move)
 }
 
 Bitboard ChessRules::slide_piece(
-    Bitboard piece_position, int shift, Bitboard boundary_mask, bool single_move) 
+    const Bitboard &piece_position, int shift, 
+    const Bitboard &boundary_mask, bool single_move
+) 
 {
     Bitboard piece_moves = 0ULL;
     Bitboard move = piece_position;
@@ -276,7 +182,7 @@ Bitboard ChessRules::slide_piece(
     return piece_moves;
 }
 
-Bitboard ChessRules::generate_all_rooks_moves(Bitboard rook_board) 
+Bitboard ChessRules::generate_all_rooks_moves(const Bitboard &rook_board) 
 {
     Bitboard rooks_moves = 0ULL;
 
@@ -288,7 +194,7 @@ Bitboard ChessRules::generate_all_rooks_moves(Bitboard rook_board)
     return rooks_moves;
 }
 
-Bitboard ChessRules::generate_all_bishops_moves(Bitboard bishop_board)
+Bitboard ChessRules::generate_all_bishops_moves(const Bitboard &bishop_board)
 {
     Bitboard bishop_moves = 0ULL;
 
@@ -300,7 +206,7 @@ Bitboard ChessRules::generate_all_bishops_moves(Bitboard bishop_board)
     return bishop_moves;
 }
 
-Bitboard ChessRules::generate_all_knights_moves(Bitboard knights_board)
+Bitboard ChessRules::generate_all_knights_moves(const Bitboard &knights_board)
 {
     Bitboard knights_moves = 0ULL;
 
@@ -316,58 +222,70 @@ Bitboard ChessRules::generate_all_knights_moves(Bitboard knights_board)
     return knights_moves;
 }
 
-Bitboard ChessRules::generate_all_queens_moves(Bitboard queen_board)
+Bitboard ChessRules::generate_all_queens_moves(const Bitboard &queen_board)
 {
     Bitboard queens_moves = generate_all_bishops_moves(
         queen_board) | generate_all_rooks_moves(queen_board);
     return queens_moves;
 }
 
-Bitboard ChessRules::generate_queen_side_castling_move(Bitboard king_board)
+Bitboard ChessRules::generate_queen_side_castling_move(const Bitboard &king_board)
 {
-    Bitboard queen_castling = 0ULL;
-    Bitboard queen_castling_squares = 0ULL;
+    Bitboard queen_castling_moves = 0ULL;
+    Bitboard queen_castling_squares_pass = 0ULL;
 
     if (this->white_to_move) {
-        queen_castling_squares = 0x00'00'00'00'00'00'00'0EULL;
+        if (king_board != 0x00'00'00'00'00'00'00'10ULL) {
+            return queen_castling_moves;
+        }
+        queen_castling_squares_pass = 0x00'00'00'00'00'00'00'0EULL;
     } else {
-        queen_castling_squares = 0x0E'00'00'00'00'00'00'00ULL;
+        if (king_board != 0x10'00'00'00'00'00'00'00ULL) {
+            return queen_castling_moves;
+        }
+        queen_castling_squares_pass = 0x0E'00'00'00'00'00'00'00ULL;
     }
 
-    if (!(queen_castling_squares & this->full_board)) {
+    if (!(queen_castling_squares_pass & this->full_board)) {
         if (this->white_to_move && this->white_queen_side_castling) {
-            queen_castling = 0x00'00'00'00'00'00'00'04ULL;
+            queen_castling_moves = 0x00'00'00'00'00'00'00'04ULL;
         } else if (this->black_queen_side_castling) {
-            queen_castling = 0x04'00'00'00'00'00'00'00ULL;
+            queen_castling_moves = 0x04'00'00'00'00'00'00'00ULL;
         }
     }
 
-    return queen_castling;
+    return queen_castling_moves;
 }
 
-Bitboard ChessRules::generate_king_side_castling_move(Bitboard king_board)
+Bitboard ChessRules::generate_king_side_castling_move(const Bitboard &king_board)
 {
-    Bitboard king_castling = 0ULL;
-    Bitboard king_castling_squares = 0ULL;
+    Bitboard king_castling_moves = 0ULL;
+    Bitboard king_castling_squares_pass = 0ULL;
 
     if (this->white_to_move) {
-        king_castling_squares = 0x00'00'00'00'00'00'00'60ULL;
+        if (king_board != 0x00'00'00'00'00'00'00'10ULL) {
+            return king_castling_moves;
+        }
+        king_castling_squares_pass = 0x00'00'00'00'00'00'00'60ULL;
     } else {
-        king_castling_squares = 0x60'00'00'00'00'00'00'00ULL;
+        if (king_board != 0x10'00'00'00'00'00'00'00ULL) {
+            return king_castling_moves;
+        }
+        king_castling_squares_pass = 0x60'00'00'00'00'00'00'00ULL;
     }
 
-    if (!(king_castling_squares & this->full_board)) {
+    if (!(king_castling_squares_pass & this->full_board)) {
         if (this->white_to_move && this->white_king_side_castling) {
-            king_castling = 0x00'00'00'00'00'00'00'40ULL;
+            king_castling_moves = 0x00'00'00'00'00'00'00'40ULL;
         } else if (this->black_king_side_castling) {
-            king_castling = 0x40'00'00'00'00'00'00'00ULL;
+            king_castling_moves = 0x40'00'00'00'00'00'00'00ULL;
         }
     }
 
-    return king_castling;
+    return king_castling_moves;
 }
 
-Bitboard ChessRules::generate_all_kings_moves(Bitboard king_board)
+Bitboard ChessRules::generate_all_kings_moves(const Bitboard &king_board)
 {
     Bitboard king_moves = 0ULL;
 
@@ -386,7 +304,9 @@ Bitboard ChessRules::generate_all_kings_moves(Bitboard king_board)
     return king_moves;
 }
 
-Bitboard ChessRules::slide_pawn(Bitboard pawn_position, int shift, Bitboard boundary_mask) 
+Bitboard ChessRules::slide_pawn(
+    const Bitboard &pawn_position, int shift, const Bitboard &boundary_mask
+) 
 {
     Bitboard pawns_moves = 0ULL;
     Bitboard move = pawn_position;
@@ -402,7 +322,7 @@ Bitboard ChessRules::slide_pawn(Bitboard pawn_position, int shift, Bitboard boun
     return pawns_moves;
 }
 
-Bitboard ChessRules::slide_double_pawn(Bitboard pawn_position, int shift) 
+Bitboard ChessRules::slide_double_pawn(const Bitboard &pawn_position, int shift) 
 {
     Bitboard pawns_moves = 0ULL;
     Bitboard move_double = pawn_position;
@@ -421,7 +341,9 @@ Bitboard ChessRules::slide_double_pawn(Bitboard pawn_position, int shift)
     return pawns_moves;
 }
 
-Bitboard ChessRules::capture_pawn(Bitboard pawn_position, int shift, Bitboard boundary_mask) 
+Bitboard ChessRules::capture_pawn(
+    const Bitboard &pawn_position, int shift, const Bitboard &boundary_mask
+) 
 {
     Bitboard pawns_moves = 0ULL;
     Bitboard move = pawn_position;
@@ -438,7 +360,7 @@ Bitboard ChessRules::capture_pawn(Bitboard pawn_position, int shift, Bitboard bo
     return pawns_moves;
 }
 
-Bitboard ChessRules::generate_en_passant_move(Bitboard pawn_position) 
+Bitboard ChessRules::generate_en_passant_move(const Bitboard &pawn_position) 
 {
     Bitboard en_passant_move_board = 0ULL;
 
@@ -463,38 +385,9 @@ Bitboard ChessRules::generate_en_passant_move(Bitboard pawn_position)
     return en_passant_move_board;
 }
 
-Bitboard ChessRules::en_passant_move_old(Bitboard pawn_position) 
-{
-    Bitboard en_passant_move = 0ULL;
-    Bitboard pawns_start_squares = 0ULL;
-
-    if (this->white_to_move) {
-        pawns_start_squares = RANK_5;
-    } else {
-        pawns_start_squares = RANK_4;
-    }
-
-    if (this->en_passant_square && (pawn_position & pawns_start_squares)) {
-        if ((pawn_position << 1) == last_move_end) {
-            if (this->white_to_move) {
-                en_passant_move = pawn_position << 9;
-            } else {
-                en_passant_move = pawn_position >> 7;
-            }
-        } else if ((pawn_position >> 1) == last_move_end) {
-            if (this->white_to_move) {
-                en_passant_move = pawn_position << 7;
-            } else {
-                en_passant_move = pawn_position >> 9;
-            }
-        }
-    }
-    return en_passant_move;
-}
-
 void ChessRules::check_en_passant_moves()
 {
-
+    // TODO
 }
 
 bool ChessRules::check_is_move_str_valid(std::string &move)
@@ -551,7 +444,7 @@ bool ChessRules::check_is_move_str_valid(std::string &move)
     return valid;
 }
 
-Bitboard ChessRules::generate_all_pawns_moves(Bitboard pawn_board)
+Bitboard ChessRules::generate_all_pawns_moves(const Bitboard &pawn_board)
 {
     Bitboard pawns_moves = 0ULL;
 
@@ -575,12 +468,12 @@ Bitboard ChessRules::generate_all_pawns_moves(Bitboard pawn_board)
     return pawns_moves;
 }
 
-void ChessRules::clear_bit(uint64_t &bitboard, int square)
+void ChessRules::clear_bit(uint64_t &bitboard, int square) const
 {
     bitboard &= ~(1ULL << square);
 }
 
-void ChessRules::set_bit(uint64_t &bitboard, int square)
+void ChessRules::set_bit(uint64_t &bitboard, int square) const
 {
     bitboard |= (1ULL << square);
 }
@@ -789,7 +682,9 @@ void ChessRules::apply_move_startpos(const std::string &move)
     this->add_move_log(fen);
 }
 
-void ChessRules::append_piece_or_empty(std::string &position, int &empty_count, char piece) 
+void ChessRules::append_piece_or_empty(
+    std::string &position, int &empty_count, const char &piece
+) const
 {
     if (empty_count > 0) {
         position += std::to_string(empty_count);
@@ -798,7 +693,7 @@ void ChessRules::append_piece_or_empty(std::string &position, int &empty_count, 
     position += piece;
 }
 
-std::string ChessRules::generate_current_fen()
+std::string ChessRules::generate_current_fen() const
 {
     std::ostringstream fen;
     std::string position;
@@ -950,8 +845,10 @@ void ChessRules::apply_move_fen(const std::string &fen)
     this->add_move_log(fen);
 }
 
-void ChessRules::update_all_moves_str(std::vector<std::string> &all_moves_str, 
-Bitboard start_square, Bitboard moves_end_squares)
+void ChessRules::update_all_moves_str(
+    std::vector<std::string> &all_moves_str, 
+    Bitboard start_square, Bitboard &moves_end_squares
+)
 {
     for (int index = 0; index < 64; index++) {
         if (moves_end_squares & (1ULL << index)) {
@@ -960,7 +857,9 @@ Bitboard start_square, Bitboard moves_end_squares)
     }
 }
 
-std::vector<std::string> ChessRules::get_all_moves_str(std::vector<std::string> &all_moves_str)
+std::vector<std::string> ChessRules::get_all_moves_str(
+    std::vector<std::string> &all_moves_str
+)
 {
     int index = 0;
     Bitboard moves = 0ULL;
@@ -1060,7 +959,7 @@ Bitboard ChessRules::get_all_moves_end()
 
 void ChessRules::validate_moves_str(std::vector<std::string> &all_moves_str)
 {
-    for (int i = all_moves_str.size() - 1; i >= 0; --i) {
+    for (size_t i = all_moves_str.size() - 1; i >= 0; --i) {
         if (!this->check_is_move_str_valid(all_moves_str[i])) {
             all_moves_str.erase(all_moves_str.begin() + i);
         }
@@ -1090,7 +989,7 @@ void ChessRules::undo_move()
     }
 }
 
-int ChessRules::bitboard_to_index(Bitboard bitboard) 
+int ChessRules::bitboard_to_index(Bitboard &bitboard) const
 {
     int index = 0;
 
@@ -1104,7 +1003,7 @@ int ChessRules::bitboard_to_index(Bitboard bitboard)
     return -1;
 }
 
-std::string ChessRules::index_to_square(int index) 
+std::string ChessRules::index_to_square(int index) const
 {
     int file = index % 8;
     int rank = index / 8;
@@ -1113,7 +1012,9 @@ std::string ChessRules::index_to_square(int index)
     return std::string() + file_char + rank_char;
 }
 
-std::string ChessRules::bitboards_to_move(Bitboard move_begin, Bitboard move_end) 
+std::string ChessRules::bitboards_to_move(
+    Bitboard move_begin, Bitboard move_end
+) const 
 {
     int begin_index = bitboard_to_index(move_begin);
     int end_index = bitboard_to_index(move_end);

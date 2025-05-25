@@ -103,65 +103,55 @@ public:
 
     void delete_last_log_move();
 
-    int check_square_occupation(Bitboard move);
+    int check_square_occupation(Bitboard &move) const;
 
     Bitboard slide_piece(
-        Bitboard piece_position, int shift, Bitboard boundary_mask, 
+        const Bitboard &piece_position, int shift, const Bitboard &boundary_mask, 
         bool single_move=false
-        );
+    );
 
-    Bitboard generate_all_knights_moves(Bitboard knights_board);
+    Bitboard generate_all_pawns_moves(const Bitboard &pawn_board);
+
+    Bitboard generate_all_knights_moves(const Bitboard &knights_board);
+
+    Bitboard generate_all_rooks_moves(const Bitboard &rook_board);
+
+    Bitboard generate_all_bishops_moves(const Bitboard &bishop_board);
+
+    Bitboard generate_all_queens_moves(const Bitboard &queen_board);
     
-    Bitboard generate_queen_side_castling_move(Bitboard king_board);
+    Bitboard generate_queen_side_castling_move(const Bitboard &king_board);
 
-    Bitboard generate_king_side_castling_move(Bitboard king_board);
+    Bitboard generate_king_side_castling_move(const Bitboard &king_board);
 
-    Bitboard generate_all_kings_moves(Bitboard king_board);
+    Bitboard generate_all_kings_moves(const Bitboard &king_board);
 
-    Bitboard slide_pawn(Bitboard pawn_position, int shift, Bitboard boundary_mask) ;
+    Bitboard slide_pawn(
+        const Bitboard &pawn_position, int shift, const Bitboard &boundary_mask
+    );
 
-    Bitboard slide_double_pawn(Bitboard pawn_position, int shift);
-
-    Bitboard capture_pawn(Bitboard pawn_position, int shift, Bitboard boundary_mask);
-
-    Bitboard generate_en_passant_move(Bitboard pawn_position);
-
-    Bitboard en_passant_move_old(Bitboard pawn_position);
+    Bitboard slide_double_pawn(const Bitboard &pawn_position, int shift);
+    
+    Bitboard capture_pawn(
+        const Bitboard &pawn_position, int shift, const Bitboard &boundary_mask
+    );
+    
+    Bitboard generate_en_passant_move(const Bitboard &pawn_position);
 
     void check_en_passant_moves();
 
-    Bitboard generate_all_pawns_moves(Bitboard pawn_board);
+    void clear_bit(uint64_t &bitboard, int square) const;
 
-    void clear_bit(uint64_t &bitboard, int square);
-
-    void set_bit(uint64_t &bitboard, int square);
+    void set_bit(uint64_t &bitboard, int square) const;
 
     void update_all_moves_str(
         std::vector<std::string> &all_moves_str, 
-        Bitboard start_square, Bitboard moves_end_squares
+        Bitboard start_square, Bitboard &moves_end_squares
         );
 
-    int bitboard_to_index(Bitboard bitboard);
+    Bitboard get_full_board() const;
 
-    std::string index_to_square(int index);
-
-    Bitboard get_full_board();
-
-    char *get_char_list_board();
-
-    void get_bitboards_from_char_list(const char* char_board) ;
-
-    void print_bitboard_as_bytes(Bitboard board);
-
-    void print_graphic_bitboard(Bitboard board);
-
-    void print_graphic_chessboard(const std::string &board_str);
-
-    Bitboard generate_all_rooks_moves(Bitboard rook_board);
-
-    Bitboard generate_all_bishops_moves(Bitboard bishop_board);
-
-    Bitboard generate_all_queens_moves(Bitboard queen_board);
+    char *get_char_list_board() const;
 
     bool check_is_move_str_valid(std::string &move);
 
@@ -171,9 +161,9 @@ public:
 
     void apply_move_startpos(const std::string &move);
 
-    void append_piece_or_empty(std::string &position, int &empty_count, char piece);
+    void append_piece_or_empty(std::string &position, int &empty_count, const char &piece) const;
 
-    std::string generate_current_fen();
+    std::string generate_current_fen() const;
 
     void apply_move_fen(const std::string &fen);
 
@@ -187,7 +177,13 @@ public:
 
     void undo_move();
 
-    std::string bitboards_to_move(Bitboard move_begin, Bitboard move_end);
+    int bitboard_to_index(Bitboard &bitboard) const;
+
+    std::string index_to_square(int index) const;
+
+    std::string bitboards_to_move(
+        Bitboard move_begin, Bitboard move_end
+    ) const;
 };
 
 #endif // CHESS_RULES_H
